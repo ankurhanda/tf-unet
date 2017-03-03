@@ -90,7 +90,7 @@ u-net is defined in the **custom_layers_unet.py** as a function
         
 ```
     
-To make sure you don't cnosider the pixels with zero labels *i.e.* pxels with missing labels make sure to do the following
+To make sure you don't consider the pixels with zero labels *i.e.* pixels with missing labels, do the following
     
 ```
 loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=pred, labels=gt)
