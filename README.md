@@ -4,13 +4,14 @@ tensorflow version of unet
 u-net is defined in the **custom_layers_unet.py** as a function 
 ```Python
 
-    def unet(images, training=True):
-	 print('-'*30)
-	 print('Network Architecture')
-	 print('-'*30)
-	 global VARIABLE_COUNTER
-	 VARIABLE_COUNTER = 0
-	 layer_name_dict = {}
+def unet(images, training=True):
+    
+    print('-'*30)
+    print('Network Architecture')
+    print('-'*30)
+    global VARIABLE_COUNTER
+    VARIABLE_COUNTER = 0
+    layer_name_dict = {}
 	    
     def layer_name(base_name):
         if base_name not in layer_name_dict:
