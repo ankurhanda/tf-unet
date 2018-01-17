@@ -27,11 +27,11 @@ class UNet(object):
 
         self.cost = tf.reduce_mean(loss_map)
 
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            self.train_op = self.optimizer.minimize(self.cost)
+        # with tf.control_dependencies(update_ops):
+        self.train_op = optimizer.minimize(self.cost)
 
         self.sess = sess
 
