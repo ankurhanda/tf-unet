@@ -11,7 +11,7 @@ class UNet(object):
         self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
 
         self.gt_labels = tf.placeholder(tf.int32, batch_size * img_width * img_height)
-        self.gt_labels = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
+        self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
 
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
         self.prediction, self.pred_classes = self.build_network(input_tensor= self.input_tensor,
@@ -22,8 +22,9 @@ class UNet(object):
         self.flattened_pred = tf.reshape(self.prediction, [-1, num_classes])
 
         # Define loss and optimizer
-        loss_map  = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.flattened_pred, labels=self.gt_labels)
-        loss_map  = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt_labels, 0)))
+        loss_map  = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.flattened_pred, labels=self.gt)
+        loss_map  = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
+
         self.cost = tf.reduce_mean(loss_map)
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -145,10 +146,10 @@ class UNet(object):
 
         return prediction, classes
 
-    def train(self, inputs, gt_labels):
+    def train(self, inputs, labels):
         self.sess.run([self.train_op, self.cost], feed_dict={
             self.input_tensor: inputs,
-            self.gt_labels: gt_labels
+            self.gt_labels: labels
         })
 
     def predict(self, inputs):
