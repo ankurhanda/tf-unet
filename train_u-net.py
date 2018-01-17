@@ -113,6 +113,7 @@ with tf.device("/gpu:0"):
 # Launch the graph
     config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     epoch = 1
+
     #config.gpu_options.allow_growth=True
     with tf.Session(config=config) as sess:
         sess.run(init)
@@ -121,6 +122,7 @@ with tf.device("/gpu:0"):
         step = 1
         
         while 1:
+
             img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
             #print(img.shape)
 
