@@ -36,7 +36,7 @@ def tile_images(img, batch_size, rows, cols, rgb):
         
 
 
-# SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/media/ankur/nnseg/sunrgbd_training.txt")
+#SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 
 # Parameters
 #learning_rate = 0.1
