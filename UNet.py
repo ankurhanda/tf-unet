@@ -37,105 +37,105 @@ class UNet(object):
 
     def build_network(self, input_tensor, initializer, is_training, num_classes=14):
 
-        with tf.variable_scope('encoder') as scope:
+        # with tf.variable_scope('encoder') as scope:
 
-            conv_layer = layers.conv2d(input_tensor, num_outputs=64, kernel_size=(3,3),
-                                       stride=1, padding='SAME', weights_initializer=initializer,
-                                       activation_fn=tf.identity)
-            conv_layer_enc_64 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3,3),
-                                                    output_channels=64, initializer=initializer,
-                                                    stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer = layers.max_pool2d(inputs=conv_layer_enc_64, kernel_size=(2,2), stride=2)
-
-
-            # Input size is H/2 x W/2
-            conv_layer_enc_128 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
-                                                       output_channels=128, initializer=initializer,
+        conv_layer = layers.conv2d(input_tensor, num_outputs=64, kernel_size=(3,3),
+                                   stride=1, padding='SAME', weights_initializer=initializer,
+                                   activation_fn=tf.identity)
+        conv_layer_enc_64 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3,3),
+                                                       output_channels=64, initializer=initializer,
                                                        stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_enc_128 = resnet_utils.conv_bn_layer(conv_layer_enc_128, kernel_size=(3, 3),
-                                                       output_channels=128, initializer=initializer,
-                                                       stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer = layers.max_pool2d(inputs=conv_layer_enc_128, kernel_size=(2, 2), stride=2)
+        conv_layer = layers.max_pool2d(inputs=conv_layer_enc_64, kernel_size=(2,2), stride=2)
 
 
-            #Input size is H/4 x W/4
-            conv_layer_enc_256 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
+        # Input size is H/2 x W/2
+        conv_layer_enc_128 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
+                                                        output_channels=128, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_enc_128 = resnet_utils.conv_bn_layer(conv_layer_enc_128, kernel_size=(3, 3),
+                                                        output_channels=128, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer = layers.max_pool2d(inputs=conv_layer_enc_128, kernel_size=(2, 2), stride=2)
+
+
+        #Input size is H/4 x W/4
+        conv_layer_enc_256 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
                                                         output_channels=256, initializer=initializer,
                                                         stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_enc_256 = resnet_utils.conv_bn_layer(conv_layer_enc_256, kernel_size=(3, 3),
+        conv_layer_enc_256 = resnet_utils.conv_bn_layer(conv_layer_enc_256, kernel_size=(3, 3),
                                                         output_channels=256, initializer=initializer,
                                                         stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer = layers.max_pool2d(inputs=conv_layer_enc_256, kernel_size=(2, 2), stride=2)
+        conv_layer = layers.max_pool2d(inputs=conv_layer_enc_256, kernel_size=(2, 2), stride=2)
 
-            # Input size is H/8 x W/8
-            conv_layer_enc_512 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
+        # Input size is H/8 x W/8
+        conv_layer_enc_512 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
                                                         output_channels=512, initializer=initializer,
                                                         stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_enc_512 = resnet_utils.conv_bn_layer(conv_layer_enc_512, kernel_size=(3, 3),
+        conv_layer_enc_512 = resnet_utils.conv_bn_layer(conv_layer_enc_512, kernel_size=(3, 3),
                                                         output_channels=512, initializer=initializer,
                                                         stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer = layers.max_pool2d(inputs=conv_layer_enc_512, kernel_size=(2, 2), stride=2)
+        conv_layer = layers.max_pool2d(inputs=conv_layer_enc_512, kernel_size=(2, 2), stride=2)
 
 
-            conv_layer_enc_1024 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
-                                                        output_channels=1024, initializer=initializer,
+        conv_layer_enc_1024 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3, 3),
+                                                         output_channels=1024, initializer=initializer,
+                                                         stride=1, bn=True, is_training=is_training, relu=True)
+
+        # with tf.variable_scope('decoder') as scope:
+
+        conv_layer_dec_512 = resnet_utils.conv_bn_layer(conv_layer_enc_1024, kernel_size=(3, 3),
+                                                        output_channels=512, initializer=initializer,
                                                         stride=1, bn=True, is_training=is_training, relu=True)
 
-        with tf.variable_scope('decoder') as scope:
+        reduced_patchsize = np.multiply(conv_layer_dec_512.get_shape().as_list()[1:3], 2)
+        conv_layer_dec_512 = tf.image.resize_images(conv_layer_dec_512, size=reduced_patchsize,
+                                                    method=tf.image.ResizeMethod.BILINEAR)
 
-            conv_layer_dec_512 = resnet_utils.conv_bn_layer(conv_layer_enc_1024, kernel_size=(3, 3),
-                                                            output_channels=512, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_1024=  tf.concat([conv_layer_dec_512, conv_layer_enc_512], axis=3)
+        conv_layer_dec_512 = resnet_utils.conv_bn_layer(conv_layer_dec_1024, kernel_size=(3, 3),
+                                                        output_channels=512, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_256 = resnet_utils.conv_bn_layer(conv_layer_dec_512, kernel_size=(3, 3),
+                                                        output_channels=256, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
 
-            reduced_patchsize = np.multiply(conv_layer_dec_512.get_shape().as_list()[1:3], 2)
-            conv_layer_dec_512 = tf.image.resize_images(conv_layer_dec_512, size=reduced_patchsize,
-                                                            method=tf.image.ResizeMethod.BILINEAR)
+        reduced_patchsize = np.multiply(conv_layer_dec_256.get_shape().as_list()[1:3], 2)
+        conv_layer_dec_256 = tf.image.resize_images(conv_layer_dec_256, size=reduced_patchsize,
+                                                    method=tf.image.ResizeMethod.BILINEAR)
 
-            conv_layer_dec_1024=  tf.concat([conv_layer_dec_512, conv_layer_enc_512], axis=3)
-            conv_layer_dec_512 = resnet_utils.conv_bn_layer(conv_layer_dec_1024, kernel_size=(3, 3),
-                                                            output_channels=512, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_dec_256 = resnet_utils.conv_bn_layer(conv_layer_dec_512, kernel_size=(3, 3),
-                                                            output_channels=256, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
-
-            reduced_patchsize = np.multiply(conv_layer_dec_256.get_shape().as_list()[1:3], 2)
-            conv_layer_dec_256 = tf.image.resize_images(conv_layer_dec_256, size=reduced_patchsize,
-                                                        method=tf.image.ResizeMethod.BILINEAR)
-
-            conv_layer_dec_512 = tf.concat([conv_layer_dec_256, conv_layer_enc_256], axis=3)
-            conv_layer_dec_256 = resnet_utils.conv_bn_layer(conv_layer_dec_512, kernel_size=(3, 3),
-                                                            output_channels=256, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_dec_128 = resnet_utils.conv_bn_layer(conv_layer_dec_256, kernel_size=(3, 3),
-                                                            output_channels=128, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_512 = tf.concat([conv_layer_dec_256, conv_layer_enc_256], axis=3)
+        conv_layer_dec_256 = resnet_utils.conv_bn_layer(conv_layer_dec_512, kernel_size=(3, 3),
+                                                        output_channels=256, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_128 = resnet_utils.conv_bn_layer(conv_layer_dec_256, kernel_size=(3, 3),
+                                                        output_channels=128, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
 
 
-            reduced_patchsize = np.multiply(conv_layer_dec_128.get_shape().as_list()[1:3], 2)
-            conv_layer_dec_128 = tf.image.resize_images(conv_layer_dec_128, size=reduced_patchsize,
-                                                        method=tf.image.ResizeMethod.BILINEAR)
+        reduced_patchsize = np.multiply(conv_layer_dec_128.get_shape().as_list()[1:3], 2)
+        conv_layer_dec_128 = tf.image.resize_images(conv_layer_dec_128, size=reduced_patchsize,
+                                                    method=tf.image.ResizeMethod.BILINEAR)
 
-            conv_layer_dec_256 = tf.concat([conv_layer_dec_128, conv_layer_enc_128], axis=3)
-            conv_layer_dec_128 = resnet_utils.conv_bn_layer(conv_layer_dec_256, kernel_size=(3, 3),
-                                                            output_channels=128, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_128, kernel_size=(3, 3),
-                                                            output_channels=64, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_256 = tf.concat([conv_layer_dec_128, conv_layer_enc_128], axis=3)
+        conv_layer_dec_128 = resnet_utils.conv_bn_layer(conv_layer_dec_256, kernel_size=(3, 3),
+                                                        output_channels=128, initializer=initializer,
+                                                        stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_128, kernel_size=(3, 3),
+                                                       output_channels=64, initializer=initializer,
+                                                       stride=1, bn=True, is_training=is_training, relu=True)
 
 
-            reduced_patchsize = np.multiply(conv_layer_dec_64.get_shape().as_list()[1:3], 2)
-            conv_layer_dec_64 = tf.image.resize_images(conv_layer_dec_64, size=reduced_patchsize,
-                                                        method=tf.image.ResizeMethod.BILINEAR)
+        reduced_patchsize = np.multiply(conv_layer_dec_64.get_shape().as_list()[1:3], 2)
+        conv_layer_dec_64 = tf.image.resize_images(conv_layer_dec_64, size=reduced_patchsize,
+                                                   method=tf.image.ResizeMethod.BILINEAR)
 
-            conv_layer_dec_128 = tf.concat([conv_layer_dec_64, conv_layer_enc_64], axis=3)
-            conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_128, kernel_size=(3, 3),
-                                                            output_channels=64, initializer=initializer,
-                                                            stride=1, bn=True, is_training=is_training, relu=True)
-            conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_64, kernel_size=(3, 3),
-                                                           output_channels=64, initializer=initializer,
-                                                           stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_128 = tf.concat([conv_layer_dec_64, conv_layer_enc_64], axis=3)
+        conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_128, kernel_size=(3, 3),
+                                                       output_channels=64, initializer=initializer,
+                                                       stride=1, bn=True, is_training=is_training, relu=True)
+        conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_64, kernel_size=(3, 3),
+                                                       output_channels=64, initializer=initializer,
+                                                       stride=1, bn=True, is_training=is_training, relu=True)
 
         prediction = layers.conv2d(conv_layer_dec_64, num_outputs=num_classes, kernel_size=(3,3),
                                    stride=1, padding='SAME', weights_initializer=initializer,
