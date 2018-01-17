@@ -107,6 +107,15 @@ with tf.Session(config=config) as sess:
 
     unet = UNet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
 
+    while True:
+
+        img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
+        label = np.reshape(label, [-1])
+        results = unet.train(img, label)
+        train_op, cost = results
+
+        print('cost = ', cost)
+
     # while True:
 
 
