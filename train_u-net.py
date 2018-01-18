@@ -9,6 +9,7 @@ import argparse
 from UNet import UNet
 
 import numpy as np
+'''
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 
@@ -34,9 +35,9 @@ def tile_images(img, batch_size, rows, cols, rgb):
            
     return batchImages
         
+'''
 
-
-#SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 
 # Parameters
 #learning_rate = 0.1
@@ -65,6 +66,8 @@ args = parser.parse_args()
 rows = np.int(np.ceil(np.sqrt(args.batch_size)))
 cols = np.int(np.ceil(args.batch_size / rows))
 
+'''
+
 #inspired by http://jdherman.github.io/colormap/
 colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
                (0.5843,0,0.9412),(0.8706,0.9451,0.0941),(1.0000,0.8078,0.8078),
@@ -91,10 +94,9 @@ fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
 fig.show()
 class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
 weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
+'''
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-init = tf.global_variables_initializer()
-
 
 img_width  = 320
 img_height = 240
@@ -103,18 +105,21 @@ batch_size = 20
 learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
-    sess.run(init)
 
     unet = UNet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
+    sess.run(tf.global_variables_initializer())
 
+    
     while True:
 
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
+        print('img size, label =', img.shape, label.shape)
         label = np.reshape(label, [-1])
-        results = unet.train(img, label)
-        train_op, cost = results
+        train_op = unet.train(img, label)
+        pred, pred_class = unet.predict(img)
 
-        print('cost = ', cost)
+        #print('cost = ', cost)
+    
 
     # while True:
 

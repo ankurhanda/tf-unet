@@ -28,6 +28,7 @@ class dataset:
             for line in f:
                 self.rgb_names.append(line.split()[0])
                 self.label_names.append(line.split()[1])
+                print(line.split()[0], line.split()[1])
                 i+=1
                 
         self.dataset_size = i 
