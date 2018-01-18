@@ -9,10 +9,11 @@ import argparse
 from UNet import unet
 
 import numpy as np
-'''
+
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 
+'''
 pl.close('all')
 
 
@@ -34,7 +35,6 @@ def tile_images(img, batch_size, rows, cols, rgb):
                     batchImages[0+i*240:(i+1)*240,0+j*320:(j+1)*320]   = img[i*cols+j]
            
     return batchImages
-        
 '''
 
 
@@ -43,14 +43,8 @@ def tile_images(img, batch_size, rows, cols, rgb):
 training_iters = 200000
 display_step = 10
 
-base_learning_rate=0.1
-learning_rate = tf.placeholder(tf.float32, shape=[])
-
-# tf Graph input
-
-# y_bool = tf.placeholder(tf.int32, batch_size*img_width*img_height)
-
-
+# base_learning_rate=0.1
+# learning_rate = tf.placeholder(tf.float32, shape=[])
 
 
 # Training settings
@@ -63,7 +57,6 @@ args = parser.parse_args()
 rows = np.int(np.ceil(np.sqrt(args.batch_size)))
 cols = np.int(np.ceil(args.batch_size / rows))
 
-'''
 
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 
