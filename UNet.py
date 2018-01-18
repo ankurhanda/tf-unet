@@ -4,43 +4,35 @@ import resnet_utils
 import numpy as np
 
 
-class UNet(object):
+class unet(object):
 
     def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True):
+
+        self.sess = sess
 
         self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
 
         self.gt_labels = tf.placeholder(tf.int32, batch_size * img_width * img_height)
+
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
 
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
-        self.prediction, self.pred_classes = self.build_network(input_tensor= self.input_tensor,
-                                             initializer=he_initializer,
-                                             is_training=is_training,
-                                             num_classes=14)
 
-        self.flattened_pred = tf.reshape(self.prediction, [-1, num_classes])
+        self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
+                                                                           is_training=is_training,
+                                                                           num_classes=14)
 
-        # Define loss and optimizer
-        loss_map  = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.flattened_pred, labels=self.gt)
-        loss_map  = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
-
-        self.cost = tf.reduce_mean(loss_map)
+        print(self.prediction)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        
         with tf.control_dependencies(update_ops):
-          self.train_op = optimizer.minimize(self.cost)
+           self.train_op = optimizer.minimize(self.cost)
 
-        self.sess = sess
+    def build_network(self, initializer, is_training, num_classes=14):
 
-
-    def build_network(self, input_tensor, initializer, is_training, num_classes=14):
-
-        # with tf.variable_scope('encoder') as scope:
-
-        conv_layer = layers.conv2d(input_tensor, num_outputs=64, kernel_size=(3,3),
+        conv_layer = layers.conv2d(self.input_tensor, num_outputs=64, kernel_size=(3,3),
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
         conv_layer_enc_64 = resnet_utils.conv_bn_layer(conv_layer, kernel_size=(3,3),
@@ -134,6 +126,7 @@ class UNet(object):
         conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_128, kernel_size=(3, 3),
                                                        output_channels=64, initializer=initializer,
                                                        stride=1, bn=True, is_training=is_training, relu=True)
+
         conv_layer_dec_64 = resnet_utils.conv_bn_layer(conv_layer_dec_64, kernel_size=(3, 3),
                                                        output_channels=64, initializer=initializer,
                                                        stride=1, bn=True, is_training=is_training, relu=True)
@@ -143,11 +136,26 @@ class UNet(object):
                                    activation_fn=tf.identity)
 
         classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
+        flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
-        return prediction, classes
+        print(flattened_pred)
+
+        # Define loss and optimizer
+        loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=self.gt)
+        loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
+
+        cost = tf.reduce_mean(loss_map)
+
+        return prediction, classes, cost
+
+    def get_cost(self, inputs, labels):
+        return self.sess.run(self.cost, feed_dict={
+            self.input_tensor: inputs,
+            self.gt_labels: labels
+        })
 
     def train(self, inputs, labels):
-        self.sess.run([self.train_op, self.cost], feed_dict={
+        return self.sess.run([self.train_op, self.cost], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels
         })
