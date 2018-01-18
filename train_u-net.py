@@ -6,7 +6,7 @@ import read_sunrgbd_data
 from PIL import Image
 import argparse
 
-from UNet import UNet
+from UNet import unet
 
 import numpy as np
 import matplotlib.pyplot as pl
@@ -36,7 +36,7 @@ def tile_images(img, batch_size, rows, cols, rgb):
         
 
 
-# SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/media/ankur/nnseg/sunrgbd_training.txt")
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 
 # Parameters
 #learning_rate = 0.1
@@ -44,12 +44,10 @@ training_iters = 200000
 display_step = 10
 
 base_learning_rate=0.1
-
-#learning_rate = tf.placeholder(tf.float32, shape=[])
+learning_rate = tf.placeholder(tf.float32, shape=[])
 
 # tf Graph input
-# x = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
-# y = tf.placeholder(tf.int32, batch_size*img_width*img_height)
+
 # y_bool = tf.placeholder(tf.int32, batch_size*img_width*img_height)
 
 
@@ -93,33 +91,35 @@ class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
 weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-init = tf.global_variables_initializer()
 
 
 img_width  = 320
 img_height = 240
 
-batch_size = 20
+batch_size = 2
 learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
-    sess.run(init)
 
-    unet = UNet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
+    u_net = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
+    sess.run(tf.global_variables_initializer())
 
     while True:
-
+        # u_net.train_epoch()
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         label = np.reshape(label, [-1])
-        results = unet.train(img, label)
-        train_op, cost = results
-
+        # print(label.shape)
+        # results = unet.train(img, label)
+        cost = u_net.get_cost(img, label)
+        # # train_op, cost = results
         print('cost = ', cost)
 
     # while True:
 
 
-
+# x = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
+# y = tf.placeholder(tf.int32, batch_size*img_width*img_height)
+#
 # with tf.device("/gpu:0"):
 #     # Construct model
 #     pred, pred_bhwd = custom_layers_unet.unet(x, training=True)
@@ -171,11 +171,11 @@ with tf.Session(config=config) as sess:
 #             #print(best_labels[1])
 #             #print(best_labels.shape)
 #
-#             batchImage = tile_images(best_labels,batch_size, rows, cols, 1)
-#             im.set_data(np.uint8(batchImage));
+#             # batchImage = tile_images(best_labels,batch_size, rows, cols, 1)
+#             # im.set_data(np.uint8(batchImage));
 #             #print('max = ',img[1].max(),'min= ', img[1].min())
 #             #im.set_clim(vmin=0.0, vmax=255.0)
-#             fig.show();
-#             pl.pause(0.00001);
+#             # fig.show();
+#             # pl.pause(0.00001);
   
     
