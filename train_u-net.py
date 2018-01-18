@@ -60,6 +60,7 @@ cols = np.int(np.ceil(args.batch_size / rows))
 
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 
+'''
 #inspired by http://jdherman.github.io/colormap/
 colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
                (0.5843,0,0.9412),(0.8706,0.9451,0.0941),(1.0000,0.8078,0.8078),
@@ -86,6 +87,7 @@ fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
 fig.show()
 class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
 weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
+'''
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
