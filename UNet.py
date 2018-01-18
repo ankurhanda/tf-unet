@@ -138,8 +138,6 @@ class unet(object):
         classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
-        print(flattened_pred)
-
         # Define loss and optimizer
         loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=self.gt)
         loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
@@ -154,7 +152,7 @@ class unet(object):
             self.gt_labels: labels
         })
 
-    def train(self, inputs, labels):
+    def train_batch(self, inputs, labels):
         return self.sess.run([self.train_op, self.cost], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels

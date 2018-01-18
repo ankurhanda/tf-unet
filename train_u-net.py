@@ -59,6 +59,7 @@ cols = np.int(np.ceil(args.batch_size / rows))
 
 
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
+# SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 
 '''
 #inspired by http://jdherman.github.io/colormap/
@@ -75,6 +76,7 @@ fig, ax = pl.subplots()
 
 someImage = np.random.random((240*np.int(rows),320*np.int(cols),14))
 some_img_argmax = np.argmax(someImage,axis=2)
+
 # Turn off axes and set axes limits
 #im = ax.imshow(np.ones((240*rows,320*cols,3)), interpolation='none', cmap=cm)
 im = ax.imshow(some_img_argmax, interpolation='none', cmap=cm)
@@ -99,17 +101,15 @@ learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
 
-    u_net = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
+    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
     sess.run(tf.global_variables_initializer())
 
-    
     while True:
-        # u_net.train_epoch()
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         print('img size, label =', img.shape, label.shape)
         label = np.reshape(label, [-1])
-        train_op, cost = unet.train(img, label)
-        pred, pred_class = unet.predict(img)
+        cost = UNET.get_cost(img, label)
+        pred, pred_class = UNET.predict(img)
         print('cost = ', cost)
 
     # while True:
