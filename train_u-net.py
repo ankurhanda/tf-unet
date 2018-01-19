@@ -96,7 +96,7 @@ config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 img_width  = 320
 img_height = 240
 
-batch_size = 2
+batch_size = 20
 learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
@@ -106,10 +106,10 @@ with tf.Session(config=config) as sess:
 
     while True:
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
-        print('img size, label =', img.shape, label.shape)
+        #print('img size, label =', img.shape, label.shape)
         label = np.reshape(label, [-1])
-        cost = UNET.get_cost(img, label)
-        pred, pred_class = UNET.predict(img)
+        train_op, cost = UNET.train_batch(img, label)
+        #pred, pred_class = UNET.predict(img)
         print('cost = ', cost)
 
     # while True:
