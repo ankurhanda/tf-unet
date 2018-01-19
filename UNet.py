@@ -10,19 +10,22 @@ class unet(object):
 
         self.sess = sess
 
+        self.batch_size = batch_size
+        self.img_height = img_height
+        self.img_width  = img_width
+
+        #for boot strapping loss
+        self.K = 64
+
         self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
 
         self.gt_labels = tf.placeholder(tf.int32, batch_size * img_width * img_height)
-
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
-
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
 
         self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
                                                                            is_training=is_training,
                                                                            num_classes=14)
-
-        print(self.prediction)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -142,7 +145,12 @@ class unet(object):
         loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=self.gt)
         loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
 
-        cost = tf.reduce_mean(loss_map)
+        # https://arxiv.org/pdf/1611.08323.pdf (Eq. 10)
+
+        bootstrapping_loss, indices = tf.nn.top_k(tf.reshape(loss_map, [self.batch_size, self.img_height * self.img_width]),
+                                   k=self.K, sorted=False)
+
+        cost = tf.reduce_mean(tf.reduce_mean(bootstrapping_loss))
 
         return prediction, classes, cost
 
