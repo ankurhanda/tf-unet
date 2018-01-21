@@ -90,7 +90,6 @@ fig.show()
 class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
 weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
 
-
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
 img_width  = 320
@@ -106,16 +105,13 @@ with tf.Session(config=config) as sess:
 
     while True:
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
-        #print('img size, label =', img.shape, label.shape)
         label = np.reshape(label, [-1])
-        train_op, cost = UNET.train_batch(img, label)
-        pred, pred_class = UNET.predict(img)
+        train_op, cost, pred_class = UNET.train_batch(img, label)
         print('cost = ', cost)
 
-        best_labels = np.argmax(pred, axis=3)
-        batchImage = tile_images(best_labels,batch_size, rows, cols, 1)
+        batchImage = tile_images(pred_class,batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
-        #print('max = ',img[1].max(),'min= ', img[1].min())
+        print('max = ',img[1].max(),'min= ', img[1].min(), 'cost = ', cost)
         im.set_clim(vmin=0.0, vmax=255.0)
         fig.show()
         pl.pause(0.00001)
