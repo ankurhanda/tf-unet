@@ -114,7 +114,7 @@ with tf.Session(config=config) as sess:
         im.set_data(np.uint8(batchImage))
 
         print('max = ',batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
-        im.set_clim(vmin=0.0, vmax=255.0)
+        # im.set_clim(vmin=0.0, vmax=255.0)
         fig.show()
         pl.pause(0.00001)
 
