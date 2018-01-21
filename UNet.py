@@ -228,10 +228,12 @@ class unet(object):
         loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
 
         # https://arxiv.org/pdf/1611.08323.pdf (Eq. 10)
-        bootstrapping_loss, indices = tf.nn.top_k(tf.reshape(loss_map, [self.batch_size, self.img_height * self.img_width]),
-                                   k=self.K, sorted=False)
+        # bootstrapping_loss, indices = tf.nn.top_k(tf.reshape(loss_map, [self.batch_size, self.img_height * self.img_width]),
+        #                            k=self.K, sorted=False)
+        #
+        # cost = tf.reduce_mean(tf.reduce_mean(bootstrapping_loss))
 
-        cost = tf.reduce_mean(tf.reduce_mean(bootstrapping_loss))
+        cost = tf.reduce_mean(loss_map)
 
         return prediction, classes, cost
 
