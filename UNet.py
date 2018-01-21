@@ -15,7 +15,7 @@ class unet(object):
         self.img_width  = img_width
 
         #for boot strapping loss
-        self.K = 64
+        self.K = 320*64
 
         self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
 
