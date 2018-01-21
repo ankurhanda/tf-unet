@@ -16,7 +16,6 @@ import matplotlib as mpl
 
 pl.close('all')
 
-
 def tile_images(img, batch_size, rows, cols, rgb):
     
     batchImages = np.random.random((240*rows,320*cols,rgb))
@@ -36,15 +35,6 @@ def tile_images(img, batch_size, rows, cols, rgb):
            
     return batchImages
 
-
-
-# Parameters
-#learning_rate = 0.1
-training_iters = 200000
-display_step = 10
-
-# base_learning_rate=0.1
-# learning_rate = tf.placeholder(tf.float32, shape=[])
 
 
 # Training settings
@@ -78,9 +68,7 @@ someImage = np.random.random((240*np.int(rows),320*np.int(cols),14))
 some_img_argmax = np.argmax(someImage,axis=2)
 
 # Turn off axes and set axes limits
-#im = ax.imshow(np.ones((240*rows,320*cols,3)), interpolation='none', cmap=cm)
 im = ax.imshow(some_img_argmax, interpolation='none', cmap=cm)
-
 ax.axis('tight')
 ax.axis('off')
 
@@ -114,70 +102,6 @@ with tf.Session(config=config) as sess:
         im.set_data(np.uint8(batchImage))
 
         print('max = ',batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
-        # im.set_clim(vmin=0.0, vmax=255.0)
+
         fig.show()
         pl.pause(0.00001)
-
-    # while True:
-
-
-# x = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
-# y = tf.placeholder(tf.int32, batch_size*img_width*img_height)
-#
-# with tf.device("/gpu:0"):
-#     # Construct model
-#     pred, pred_bhwd = custom_layers_unet.unet(x, training=True)
-#     gt = tf.cast(tf.reshape(y,[-1]),tf.int32)
-#     # Define loss and optimizer
-#     loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=pred, labels=gt)
-#     loss_map = tf.multiply(loss_map,tf.to_float(tf.not_equal(gt,0)))
-#     cost = tf.reduce_mean(loss_map)
-#     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
-#
-#     # Initializing the variables
-#     init = tf.global_variables_initializer()
-#
-#     #total steps
-#     #total_steps = 100
-#
-# # Launch the graph
-#     config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-#     epoch = 1
-#
-#     #config.gpu_options.allow_growth=True
-#     with tf.Session(config=config) as sess:
-#         sess.run(init)
-#
-#         print('This has been initialised')
-#         step = 1
-#
-#         while 1:
-#
-#             img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
-#             #print(img.shape)
-#
-#             #plt.show()
-#             label = np.reshape(label,[-1])
-#
-#             decay = np.floor((epoch - 1) / 30)
-#             learningRate = base_learning_rate *  np.power(0.95, decay)
-#             #learning_rate = (1/step) * 0.1
-#             _,lr = sess.run([optimizer,learning_rate], feed_dict={x: img, y: label, learning_rate:learningRate})
-#             loss= sess.run([cost], feed_dict={x: img,y: label})
-#             #print(lmap.shape)
-#             print('epoch = ', epoch, 'batch = ', step-(np.floor(5285/batch_size))*(epoch-1), 'loss = ', loss, 'learning rate =', lr)
-#             step = step + 1
-#             epoch = np.floor(step*batch_size/5285)+1
-#             tpred, tpred_bhwd = sess.run([pred, pred_bhwd], feed_dict={x: img,y: label})
-#             #print(tpred_bhwd.shape)
-#
-#             best_labels = np.argmax(tpred_bhwd,axis=3)
-#             #print(best_labels[1])
-#             #print(best_labels.shape)
-#
-#             # batchImage = tile_images(best_labels,batch_size, rows, cols, 1)
-#             # im.set_data(np.uint8(batchImage));
-#             #print('max = ',img[1].max(),'min= ', img[1].min())
-#             #im.set_clim(vmin=0.0, vmax=255.0)
-#             # fig.show();
-#             # pl.pause(0.00001);    
