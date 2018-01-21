@@ -244,7 +244,7 @@ class unet(object):
         })
 
     def train_batch(self, inputs, labels):
-        return self.sess.run([self.train_op, self.cost, self.pred_classes], feed_dict={
+        return self.sess.run([self.train_op, self.cost, self.prediction], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels
         })
