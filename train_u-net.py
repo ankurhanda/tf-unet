@@ -110,7 +110,7 @@ with tf.Session(config=config) as sess:
         train_op, cost, pred = UNET.train_batch(img, label)
 
         pred_class = np.argmax(pred,axis=3)
-        batchImage = tile_images(batch_labels, batch_size, rows, cols, 1)
+        batchImage = tile_images(pred_class, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
 
         print('max = ',batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
