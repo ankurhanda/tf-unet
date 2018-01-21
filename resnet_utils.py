@@ -21,7 +21,8 @@ def conv_bn_layer(input_tensor, kernel_size,output_channels,
         #Why scale is false when using ReLU as the next activation
         #https://datascience.stackexchange.com/questions/22073/why-is-scale-parameter-on-batch-normalization-not-needed-on-relu/22127
 
-        conv_layer = layers.batch_norm(inputs=conv_layer, center=True, scale=False, is_training=is_training)
+        #Using fuse operation: https://www.tensorflow.org/performance/performance_guide#common_fused_ops
+        conv_layer = layers.batch_norm(inputs=conv_layer, center=True, scale=False, is_training=is_training, fused=True)
         conv_layer = tf.nn.relu(conv_layer)
 
     if bn and not relu:
