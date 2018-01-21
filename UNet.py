@@ -92,7 +92,7 @@ class unet(object):
                                                                 stride=1, bn=True, is_training=is_training, relu=True)
 
                 reduced_patchsize = np.multiply(dec_layers['conv_layer_dec_' + str(int(n_feat/2))].get_shape().as_list()[1:3], 2)
-                dec_layers['conv_layer_dec_' + str(int(n_feat/2))] = tf.image.resize_images(dec_layers['conv_layer_dec_' + str(n_feat/2)],
+                dec_layers['conv_layer_dec_' + str(int(n_feat/2))] = tf.image.resize_images(dec_layers['conv_layer_dec_' + str(int(n_feat/2))],
                                                                                          size=reduced_patchsize,
                                                                                          method=tf.image.ResizeMethod.BILINEAR)
 
