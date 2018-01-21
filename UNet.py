@@ -87,12 +87,12 @@ class unet(object):
                                                             output_channels=n_feat, initializer=initializer,
                                                             stride=1, bn=True, is_training=is_training, relu=True)
             if n_feat > 64:
-                dec_layers['conv_layer_dec_' + str(n_feat/2)] = resnet_utils.conv_bn_layer(dec_layers['conv_layer_dec_' + str(n_feat)], kernel_size=(3, 3),
+                dec_layers['conv_layer_dec_' + str(int(n_feat/2))] = resnet_utils.conv_bn_layer(dec_layers['conv_layer_dec_' + str(n_feat)], kernel_size=(3, 3),
                                                                 output_channels=n_feat/2, initializer=initializer,
                                                                 stride=1, bn=True, is_training=is_training, relu=True)
 
-                reduced_patchsize = np.multiply(dec_layers['conv_layer_dec_' + str(n_feat/2)].get_shape().as_list()[1:3], 2)
-                dec_layers['conv_layer_dec_' + str(n_feat / 2)] = tf.image.resize_images(dec_layers['conv_layer_dec_' + str(n_feat/2)],
+                reduced_patchsize = np.multiply(dec_layers['conv_layer_dec_' + str(int(n_feat/2))].get_shape().as_list()[1:3], 2)
+                dec_layers['conv_layer_dec_' + str(int(n_feat/2))] = tf.image.resize_images(dec_layers['conv_layer_dec_' + str(n_feat/2)],
                                                                                          size=reduced_patchsize,
                                                                                          method=tf.image.ResizeMethod.BILINEAR)
 
