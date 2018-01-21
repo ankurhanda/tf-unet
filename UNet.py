@@ -25,13 +25,13 @@ class unet(object):
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
 
-        self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
-                                                                           is_training=is_training,
-                                                                           num_classes=14)
-
-        # self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
+        # self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
         #                                                                    is_training=is_training,
         #                                                                    num_classes=14)
+
+        self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
+                                                                           is_training=is_training,
+                                                                           num_classes=14)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
