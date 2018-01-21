@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 
-'''
+
 pl.close('all')
 
 
@@ -35,7 +35,7 @@ def tile_images(img, batch_size, rows, cols, rgb):
                     batchImages[0+i*240:(i+1)*240,0+j*320:(j+1)*320]   = img[i*cols+j]
            
     return batchImages
-'''
+
 
 
 # Parameters
@@ -61,7 +61,7 @@ cols = np.int(np.ceil(args.batch_size / rows))
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 # SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 
-'''
+
 #inspired by http://jdherman.github.io/colormap/
 colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
                (0.5843,0,0.9412),(0.8706,0.9451,0.0941),(1.0000,0.8078,0.8078),
@@ -89,7 +89,7 @@ fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
 fig.show()
 class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
 weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
-'''
+
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
@@ -109,8 +109,16 @@ with tf.Session(config=config) as sess:
         #print('img size, label =', img.shape, label.shape)
         label = np.reshape(label, [-1])
         train_op, cost = UNET.train_batch(img, label)
-        #pred, pred_class = UNET.predict(img)
+        pred, pred_class = UNET.predict(img)
         print('cost = ', cost)
+
+        best_labels = np.argmax(pred, axis=3)
+        batchImage = tile_images(best_labels,batch_size, rows, cols, 1)
+        im.set_data(np.uint8(batchImage))
+        #print('max = ',img[1].max(),'min= ', img[1].min())
+        im.set_clim(vmin=0.0, vmax=255.0)
+        fig.show()
+        pl.pause(0.00001)
 
     # while True:
 
