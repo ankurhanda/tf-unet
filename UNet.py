@@ -31,7 +31,7 @@ class unet(object):
 
         self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
                                                                            is_training=is_training,
-                                                                           num_classes=14)
+                                                                           num_classes=num_classes)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -100,7 +100,7 @@ class unet(object):
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
-        classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
+        classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
         # Define loss and optimizer
@@ -220,7 +220,7 @@ class unet(object):
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
-        classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
+        classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
         # Define loss and optimizer
