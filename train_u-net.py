@@ -76,11 +76,8 @@ ax.axis('off')
 # Set whitespace to 0
 fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
 fig.show()
-class_weights = [0, 1, 1, 1, 1 ,1, 1, 1, 1, 1, 1, 1, 1, 1]
-weight_map = tf.constant(np.array(class_weights, dtype=np.float32))
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-
 
 
 batch_size = 20
@@ -102,7 +99,7 @@ with tf.Session(config=config) as sess:
         batchImage = tile_images(pred_class, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
 
-        print('max = ',batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
+        print('max = ', batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
 
         fig.show()
         pl.pause(0.00001)
