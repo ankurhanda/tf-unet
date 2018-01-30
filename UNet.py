@@ -2,6 +2,9 @@ import tensorflow as tf
 import tensorflow.contrib.layers as layers
 import resnet_utils
 import numpy as np
+from tensorflow.python.client import device_lib
+
+from multi_gpu_utils import average_grads
 
 from collections import OrderedDict
 
@@ -25,13 +28,15 @@ class unet(object):
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
 
-        self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
-                                                                           is_training=is_training,
-                                                                           num_classes=14)
-
-        # self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
+        # self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
         #                                                                    is_training=is_training,
         #                                                                    num_classes=14)
+
+        self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
+                                                                                 input_batch=self.input_tensor,
+                                                                                 label_batch=self.gt,
+                                                                                 is_training=is_training,
+                                                                                 num_classes=num_classes)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -39,13 +44,12 @@ class unet(object):
         with tf.control_dependencies(update_ops):
            self.train_op = optimizer.minimize(self.cost)
 
-
-    def build_network_clean(self, initializer, is_training, num_classes=14):
+    def build_network_clean(self, initializer, input_batch, label_batch, is_training, num_classes=14):
 
         enc_layers = OrderedDict()
         dec_layers = OrderedDict()
 
-        conv_layer = layers.conv2d(self.input_tensor, num_outputs=64, kernel_size=(3, 3),
+        conv_layer = layers.conv2d(input_batch, num_outputs=64, kernel_size=(3, 3),
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
@@ -100,12 +104,12 @@ class unet(object):
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
-        classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
+        classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
         # Define loss and optimizer
-        loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=self.gt)
-        loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(self.gt, 0)))
+        loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=label_batch)
+        loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(label_batch, 0)))
 
         # https://arxiv.org/pdf/1611.08323.pdf (Eq. 10)
         bootstrapping_loss, indices = tf.nn.top_k(tf.reshape(loss_map, [self.batch_size, self.img_height * self.img_width]),
@@ -220,7 +224,7 @@ class unet(object):
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
-        classes = tf.cast(tf.argmax(prediction, 1), tf.uint8)
+        classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
 
         # Define loss and optimizer
@@ -237,6 +241,61 @@ class unet(object):
 
         return prediction, classes, cost
 
+    @staticmethod
+    def get_available_gpus():
+        local_device_protos = device_lib.list_local_devices()
+        return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+    def prepare_multigpu_training(self, input_batch, input_labels,
+                                  he_initializer, learning_rate=1e-3,
+                                  is_training=True, num_classes=14):
+
+        gpus = len(self.get_available_gpus())
+
+        input_batch_per_gpu  = tf.split(input_batch,  gpus)
+        input_labels_per_gpu = tf.split(input_labels, gpus)
+
+        optimiser = tf.train.AdamOptimizer(learning_rate=learning_rate)
+
+        tower_grads = []
+        costs = []
+
+        for gpu_id in range(1, gpus):
+
+            reuse = not (gpu_id == 1)
+
+            with tf.device('/gpu:%d' % gpu_id), tf.variable_scope(tf.get_variable_scope(), reuse=reuse):
+
+                curr_input_batch  =  input_batch_per_gpu[gpu_id]
+                curr_input_labels = input_labels_per_gpu[gpu_id]
+
+                cur_prediction, cur_pred_classes, cur_cost = self.build_network_clean(initializer=he_initializer,
+                                                                                      input_batch=curr_input_batch,
+                                                                                      label_batch=curr_input_labels,
+                                                                                      is_training=is_training,
+                                                                                      num_classes=num_classes)
+
+                costs.append(cur_cost)
+
+                scope = tf.get_variable_scope()
+                batch_norm_updates_op = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope))
+
+                grads = optimiser.compute_gradients(cur_cost)
+                tower_grads.append(grads)
+
+        with tf.device('/gpu:0'):
+            grads = average_grads(tower_grads)
+            apply_gradient_op = optimiser.apply_gradients(grads)
+
+        # save moving average
+        variable_averages = tf.train.ExponentialMovingAverage(0.997)#, global_step)
+        variables_averages_op = variable_averages.apply(tf.trainable_variables())
+
+        with tf.control_dependencies([variables_averages_op, apply_gradient_op, batch_norm_updates_op]):
+            train_op = tf.no_op(name='train_op')
+
+        return train_op, tf.add_n(costs) / gpus, cur_prediction
+
     def get_cost(self, inputs, labels):
         return self.sess.run(self.cost, feed_dict={
             self.input_tensor: inputs,
@@ -244,6 +303,10 @@ class unet(object):
         })
 
     def train_batch(self, inputs, labels):
+
+        # Comparing NCHW vs NHWC on GPU
+        # https://github.com/tensorflow/tensorflow/issues/12419
+
         return self.sess.run([self.train_op, self.cost, self.prediction], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels
