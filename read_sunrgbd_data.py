@@ -35,8 +35,8 @@ class dataset:
             assert len(depth_pngs) == len(label_pngs)
 
             for i in range(0, len(depth_pngs)):
-                self.rgb_names.append(depth_pngs[i])
-                self.label_names.append(label_pngs[i])
+                self.rgb_names.append(dataset_file + './depthsub' + str(i) + '.png')
+                self.label_names.append(dataset_file + './labelssub' + str(i) + '.png')
 
             self.dataset_size = len(depth_pngs)
         
