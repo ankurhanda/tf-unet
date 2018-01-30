@@ -53,7 +53,11 @@ class dataset:
             rand_i = randint(1,self.dataset_size-5)
             img = Image.open(self.rgb_names[rand_i]).resize((320,240),Image.BILINEAR)
             labelImg = Image.open(self.label_names[rand_i]).resize((320,240),Image.NEAREST)
-            imgarray[x] = np.asarray(img)
+
+            if self.img_type != 'rgb':
+                imgarray[x] = np.expand_dims(np.asarray(img), axis=2)
+            else:
+                imgarray[x] = np.asarray(img)
             labelarray[x] = np.asarray(labelImg)
             
         return imgarray,labelarray
