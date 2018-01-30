@@ -52,7 +52,9 @@ cols = np.int(np.ceil(args.batch_size / rows))
 
 #SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 #SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
-SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0")
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
+                                            "/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
+                                            img_type='depth')
 
 # SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 

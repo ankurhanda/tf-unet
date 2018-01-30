@@ -8,7 +8,7 @@ from random import randint
 
 
 class dataset:
-    def __init__(self, name, dataset_file, image_type='rgb'):
+    def __init__(self, name, dataset_file, img_type='rgb'):
         
         self.name = name
         self.dataset_file = dataset_file
@@ -16,7 +16,7 @@ class dataset:
         self.rgb_names = []
         self.label_names = []
 
-        self.image_type=image_type
+        self.img_type = img_type
 
         if dataset_file.endswith('.txt'):
             i = 0
@@ -42,7 +42,7 @@ class dataset:
         
     def get_random_shuffle(self, batch_size):
 
-        if self.image_type == 'rgb':
+        if self.img_type == 'rgb':
             imgarray   = np.empty([batch_size, 240, 320, 3],dtype=np.float32)
         else:
             imgarray = np.empty([batch_size, 240, 320, 1], dtype=np.float32)
