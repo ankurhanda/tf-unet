@@ -93,11 +93,15 @@ batch_size = 20
 learning_rate = 1e-3
 iter = 0
 
+logs_path = './tf-summary-logs/'
+
 with tf.Session(config=config) as sess:
 
     UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
                 img_type='rgb')
     sess.run(tf.global_variables_initializer())
+
+    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
     while True:
 
@@ -105,7 +109,9 @@ with tf.Session(config=config) as sess:
         batch_labels = label
 
         label = np.reshape(label, [-1])
-        train_op, cost, pred = UNET.train_batch(img, label)
+        train_op, cost, pred, summary = UNET.train_batch(img, label)
+
+        summary_writer.add_summary(summary, iter)
 
         pred_class = np.argmax(pred, axis=3)
         batch_labels[batch_labels > 0] = 1

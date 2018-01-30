@@ -48,6 +48,9 @@ class unet(object):
         with tf.control_dependencies(update_ops):
            self.train_op = optimizer.minimize(self.cost)
 
+        tf.summary.scalar("loss", self.cost)
+        self.merged_summary_op = tf.summary.merge_all()
+
     def build_network_clean(self, initializer, input_batch, label_batch, is_training, num_classes=14):
 
         enc_layers = OrderedDict()
@@ -311,7 +314,7 @@ class unet(object):
         # Comparing NCHW vs NHWC on GPU
         # https://github.com/tensorflow/tensorflow/issues/12419
 
-        return self.sess.run([self.train_op, self.cost, self.prediction], feed_dict={
+        return self.sess.run([self.train_op, self.cost, self.prediction, self.merged_summary_op], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels
         })
