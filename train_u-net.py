@@ -102,11 +102,16 @@ with tf.Session(config=config) as sess:
 
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         batch_labels = label
+
         label = np.reshape(label, [-1])
         train_op, cost, pred = UNET.train_batch(img, label)
 
         pred_class = np.argmax(pred, axis=3)
-        batchImage = tile_images(pred_class, batch_size, rows, cols, 1)
+        batch_labels[batch_labels > 0] = 1
+
+        pred_class_gt_mask = np.multply(pred_class, batch_labels)
+
+        batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
 
         print('max = ', batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
