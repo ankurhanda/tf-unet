@@ -1,18 +1,11 @@
 from __future__ import print_function
 
-#import tensorflow as tf
-#import custom_layers_unet
-import os, sys
+import os, sys, glob
 import numpy as np
-
 from PIL import Image
-
 from random import randint
-#img = Image.open("/media/ankur/nnseg/sunrgbd_rgb/train/img-004123.jpg")
-#img2 = img.resize((320,240),Image.NEAREST)
 
-#img2.show()
-#print(img.format, img.size, img.mode)
+
 
 class dataset:
     def __init__(self, name, dataset_file):
@@ -21,17 +14,29 @@ class dataset:
         self.dataset_file = dataset_file
 
         self.rgb_names = []
-        self.label_names = []        
-            
-        i = 0    
-        with open(dataset_file,"r") as f:
-            for line in f:
-                self.rgb_names.append(line.split()[0])
-                self.label_names.append(line.split()[1])
-                print(line.split()[0], line.split()[1])
-                i+=1
-                
-        self.dataset_size = i 
+        self.label_names = []
+
+        if dataset_file.endswith('.txt'):
+            i = 0
+            with open(dataset_file,"r") as f:
+                for line in f:
+                    self.rgb_names.append(line.split()[0])
+                    self.label_names.append(line.split()[1])
+                    print(line.split()[0], line.split()[1])
+                    i+=1
+
+            self.dataset_size = i
+        else:
+            depth_pngs = sorted(glob.glob(dataset_file +'/depth*.png'))
+            label_pngs = sorted(glob.glob(dataset_file +'/label*.png'))
+
+            assert len(depth_pngs) == len(label_pngs)
+
+            for i in range(0, len(depth_pngs)):
+                self.rgb_names.append(depth_pngs[i])
+                self.label_names.append(label_pngs[i])
+
+            self.dataset_size = len(depth_pngs)
         
     def get_random_shuffle(self, batch_size):
         

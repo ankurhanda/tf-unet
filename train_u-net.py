@@ -50,22 +50,28 @@ rows = np.int(np.ceil(np.sqrt(args.batch_size)))
 cols = np.int(np.ceil(args.batch_size / rows))
 
 
-SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
+# SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0")
+
 # SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 
+max_labels = 23
 
 #inspired by http://jdherman.github.io/colormap/
-colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
-               (0.5843,0,0.9412),(0.8706,0.9451,0.0941),(1.0000,0.8078,0.8078),
-               (0,0.8784,0.8980),(0.4157,0.5333,0.8000),(0.4588,0.1137,0.1608),
-               (0.9412,0.1373,0.9216),(0,0.6549,0.6118),(0.9765,0.5451,0),
-               (0.8824,0.8980,0.7608)]
+# colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
+#                (0.5843,0,0.9412),(0.8706,0.9451,0.0941),(1.0000,0.8078,0.8078),
+#                (0,0.8784,0.8980),(0.4157,0.5333,0.8000),(0.4588,0.1137,0.1608),
+#                (0.9412,0.1373,0.9216),(0,0.6549,0.6118),(0.9765,0.5451,0),
+#                (0.8824,0.8980,0.7608)]
+
+colour_code = np.random.rand(max_labels, 3)
+colour_code[0] = [0, 0, 0]
                
 cm = mpl.colors.ListedColormap(colour_code)
 
 fig, ax = pl.subplots()
 
-someImage = np.random.random((img_height*np.int(rows),img_width*np.int(cols),14))
+someImage = np.random.random((img_height*np.int(rows),img_width*np.int(cols),max_labels))
 some_img_argmax = np.argmax(someImage, axis=2)
 
 # Turn off axes and set axes limits
@@ -85,7 +91,7 @@ learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
 
-    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True)
+    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True)
     sess.run(tf.global_variables_initializer())
 
     while True:

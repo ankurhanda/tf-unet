@@ -277,11 +277,9 @@ class unet(object):
 
                 costs.append(cur_cost)
 
-                # total_loss, model_loss, output_pred = tower_loss(iis, isms, class_labels, reuse_variables)
                 scope = tf.get_variable_scope()
                 batch_norm_updates_op = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope))
 
-                # reuse_variables = True
                 grads = optimiser.compute_gradients(cur_cost)
                 tower_grads.append(grads)
 
@@ -305,6 +303,10 @@ class unet(object):
         })
 
     def train_batch(self, inputs, labels):
+
+        # Comparing NCHW vs NHWC on GPU
+        # https://github.com/tensorflow/tensorflow/issues/12419
+
         return self.sess.run([self.train_op, self.cost, self.prediction], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels
