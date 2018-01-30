@@ -40,7 +40,9 @@ class dataset:
 
             self.dataset_size = len(depth_pngs)
 
-        self.shuff_indices = np.random.shuffle(list(range(0, self.dataset_size)))
+        self.shuffle_indices = list(range(0, self.dataset_size))
+
+        np.random.shuffle(self.shuffle_indices)
         self.count = 0
 
         
@@ -55,7 +57,7 @@ class dataset:
         
         for x in range(0,batch_size):
 
-            rand_i = self.shuff_indices[self.count]
+            rand_i = self.shuffle_indices[self.count]
             img = Image.open(self.rgb_names[rand_i]).resize((320,240),Image.BILINEAR)
             labelImg = Image.open(self.label_names[rand_i]).resize((320,240),Image.NEAREST)
 
@@ -68,7 +70,7 @@ class dataset:
             self.count = self.count+1
 
             if self.count >= self.dataset_size:
-                self.shuff_indices = np.random.shuffle(list(range(0, self.dataset_size)))
+                np.random.shuffle(self.shuffle_indices)
                 self.count = 0
 
             
