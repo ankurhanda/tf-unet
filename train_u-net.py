@@ -91,6 +91,7 @@ config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
 batch_size = 20
 learning_rate = 1e-3
+iter = 0
 
 with tf.Session(config=config) as sess:
 
@@ -114,7 +115,9 @@ with tf.Session(config=config) as sess:
         batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
 
-        print('max = ', batchImage.max(),'min= ', batchImage.min(), 'cost = ', cost)
+        print('iter = ', iter, 'max = ', batchImage.max(),'min = ', batchImage.min(), 'cost = ', cost)
+
+        iter = iter + 1
 
         fig.show()
         pl.pause(0.00001)
