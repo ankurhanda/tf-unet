@@ -109,7 +109,7 @@ with tf.Session(config=config) as sess:
         pred_class = np.argmax(pred, axis=3)
         batch_labels[batch_labels > 0] = 1
 
-        pred_class_gt_mask = np.multply(pred_class, batch_labels)
+        pred_class_gt_mask = np.multiply(pred_class, batch_labels)
 
         batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
