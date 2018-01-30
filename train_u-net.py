@@ -91,7 +91,8 @@ learning_rate = 1e-3
 
 with tf.Session(config=config) as sess:
 
-    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True)
+    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
+                img_type='depth')
     sess.run(tf.global_variables_initializer())
 
     while True:

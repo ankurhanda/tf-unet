@@ -11,7 +11,8 @@ from collections import OrderedDict
 
 class unet(object):
 
-    def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14, is_training=True):
+    def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14,
+                 is_training=True, img_type='rgb'):
 
         self.sess = sess
 
@@ -22,7 +23,10 @@ class unet(object):
         #for boot strapping loss
         self.K = self.img_width * 64
 
-        self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
+        if img_type == 'rgb':
+            self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 3])
+        else:
+            self.input_tensor = tf.placeholder(tf.float32, [batch_size, img_height, img_width, 1])
 
         self.gt_labels = tf.placeholder(tf.int32, batch_size * img_width * img_height)
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
