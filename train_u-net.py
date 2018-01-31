@@ -50,15 +50,15 @@ rows = np.int(np.ceil(np.sqrt(args.batch_size)))
 cols = np.int(np.ceil(args.batch_size / rows))
 
 
-SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
+#SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 #SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
-#SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
-#                                            "/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
-#                                            img_type='depth')
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
+                                            "/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
+                                            img_type='depth')
 
 # SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
 
-max_labels = 14#23
+max_labels = 23
 
 #inspired by http://jdherman.github.io/colormap/
 # colour_code = [(0, 0, 0),(0,0,1),(0.9137,0.3490,0.1882), (0, 0.8549, 0),
@@ -110,8 +110,16 @@ with tf.Session(config=config) as sess:
 
         label = np.reshape(label, [-1])
 
-        if iter >= 11000:
+        if iter <= 500:
+            UNET.set_learning_rate(learning_rate=1e-2)
+
+        elif (iter > 500 and iter <= 1000):
+            UNET.set_learning_rate(learning_rate=1e-3)
+        else:
             UNET.set_learning_rate(learning_rate=1e-4)
+
+        # if iter >= 11000:
+        #     UNET.set_learning_rate(learning_rate=1e-4)
 
         train_op, cost, pred, summary = UNET.train_batch(img, label)
 
