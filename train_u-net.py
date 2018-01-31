@@ -104,7 +104,7 @@ with tf.Session(config=config) as sess:
     else:
         UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
                     img_type='depth')
-        
+
     sess.run(tf.global_variables_initializer())
 
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
@@ -116,10 +116,10 @@ with tf.Session(config=config) as sess:
 
         label = np.reshape(label, [-1])
 
-        if iter <= 500:
+        if iter <= 10:
             UNET.set_learning_rate(learning_rate=1e-2)
 
-        elif (iter > 500 and iter <= 1000):
+        elif (iter > 10 and iter <= 500):
             UNET.set_learning_rate(learning_rate=1e-3)
         else:
             UNET.set_learning_rate(learning_rate=1e-4)
