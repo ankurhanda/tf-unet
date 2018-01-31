@@ -7,7 +7,7 @@ from PIL import Image
 import argparse
 
 from UNet import unet
-
+import time
 import numpy as np
 
 import matplotlib.pyplot as pl
@@ -98,12 +98,8 @@ img_type = 'depth'
 
 with tf.Session(config=config) as sess:
 
-    if img_type == 'rgb':
-        UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
-                    img_type='rgb')
-    else:
-        UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
-                    img_type='depth')
+    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
+                    img_type=img_type)
 
     sess.run(tf.global_variables_initializer())
 
@@ -127,7 +123,10 @@ with tf.Session(config=config) as sess:
         # if iter >= 11000:
         #     UNET.set_learning_rate(learning_rate=1e-4)
 
+        batch_start = time.time()
         train_op, cost, pred, summary = UNET.train_batch(img, label)
+        time_taken = time.time() - batch_start
+        images_per_sec = batch_size / time_taken
 
         summary_writer.add_summary(summary, iter)
 
@@ -139,7 +138,7 @@ with tf.Session(config=config) as sess:
         batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
         im.set_data(np.uint8(batchImage))
 
-        print('iter = ', iter, 'max = ', batchImage.max(),'min = ', batchImage.min(), 'cost = ', cost)
+        print('iter = ', iter, 'max = ', batchImage.max(),'min = ', batchImage.min(), 'cost = ', cost, 'imaged = ', images_per_sec)
 
         iter = iter + 1
 
