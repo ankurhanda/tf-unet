@@ -32,6 +32,7 @@ class unet(object):
         self.gt = tf.cast(tf.reshape(self.gt_labels, [-1]), tf.int32)
         he_initializer = tf.contrib.layers.variance_scaling_initializer()
 
+
         # self.prediction, self.pred_classes, self.cost = self.build_network(initializer=he_initializer,
         #                                                                    is_training=is_training,
         #                                                                    num_classes=14)
@@ -42,7 +43,12 @@ class unet(object):
                                                                                  is_training=is_training,
                                                                                  num_classes=num_classes)
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        # How to set an adaptive learning rate.
+        # https://github.com/ibab/tensorflow-wavenet/issues/267
+        self.learning_rate_placeholder = tf.placeholder(tf.float32, [], name='learning_rate')
+        self.learning_rate = 1e-3
+
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder)
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         
         with tf.control_dependencies(update_ops):
@@ -310,6 +316,9 @@ class unet(object):
             self.gt_labels: labels
         })
 
+    def set_learning_rate(self, learning_rate=1e-3):
+        self.learning_rate = learning_rate
+
     def train_batch(self, inputs, labels):
 
         # Comparing NCHW vs NHWC on GPU
@@ -317,7 +326,8 @@ class unet(object):
 
         return self.sess.run([self.train_op, self.cost, self.prediction, self.merged_summary_op], feed_dict={
             self.input_tensor: inputs,
-            self.gt_labels: labels
+            self.gt_labels: labels,
+            self.learning_rate_placeholder: self.learning_rate
         })
 
     def predict(self, inputs):

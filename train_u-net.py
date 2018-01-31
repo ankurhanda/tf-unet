@@ -109,6 +109,10 @@ with tf.Session(config=config) as sess:
         batch_labels = label
 
         label = np.reshape(label, [-1])
+
+        if iter >= 11000:
+            UNET.set_learning_rate(learning_rate=1e-4)
+
         train_op, cost, pred, summary = UNET.train_batch(img, label)
 
         summary_writer.add_summary(summary, iter)
