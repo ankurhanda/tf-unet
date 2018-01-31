@@ -94,11 +94,17 @@ learning_rate = 1e-3
 iter = 0
 
 logs_path = './tf-summary-logs/'
+img_type = 'depth'
 
 with tf.Session(config=config) as sess:
 
-    UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
-                img_type='rgb')
+    if img_type == 'rgb':
+        UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
+                    img_type='rgb')
+    else:
+        UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
+                    img_type='depth')
+        
     sess.run(tf.global_variables_initializer())
 
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
