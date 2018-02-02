@@ -10,6 +10,7 @@ from UNet import unet
 import time
 import numpy as np
 
+
 headless = 'True'
 img_width  = 320
 img_height = 240
@@ -92,7 +93,9 @@ if headless == 'False':
     fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
     fig.show()
 
+
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+# config.gpu_options.visible_device_list = str(hvd.local_rank())
 
 
 batch_size = 10
@@ -106,6 +109,8 @@ with tf.Session(config=config) as sess:
 
     UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
                     img_type=img_type, use_horovod=True)
+
+    print(str(hvd.local_rank()))
 
     sess.run(tf.global_variables_initializer())
 
