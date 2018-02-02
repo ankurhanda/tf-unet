@@ -7,12 +7,12 @@ from tensorflow.python.client import device_lib
 from multi_gpu_utils import average_grads
 
 from collections import OrderedDict
-
+import horovod.tensorflow as hvd
 
 class unet(object):
 
     def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14,
-                 is_training=True, img_type='rgb'):
+                 is_training=True, img_type='rgb', use_horovod=False):
 
         self.sess = sess
 
@@ -48,7 +48,15 @@ class unet(object):
         self.learning_rate_placeholder = tf.placeholder(tf.float32, [], name='learning_rate')
         self.learning_rate = 1e-3
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder)
+        if use_horovod == True:
+            # Horovod: initialize Horovod.
+            hvd.init()
+
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder * hvd.size())
+
+        if use_horovod == True:
+            optimizer = hvd.DistributedOptimizer(optimizer)
+
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         
         with tf.control_dependencies(update_ops):

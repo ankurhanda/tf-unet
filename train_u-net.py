@@ -10,32 +10,35 @@ from UNet import unet
 import time
 import numpy as np
 
-import matplotlib.pyplot as pl
-import matplotlib as mpl
-
+headless = 'True'
 img_width  = 320
 img_height = 240
 
-pl.close('all')
+if headless == False:
 
-def tile_images(img, batch_size, rows, cols, rgb):
-    
-    batchImages = np.random.random((img_height*rows,img_width*cols,rgb))
+    import matplotlib.pyplot as pl
+    import matplotlib as mpl
 
-    if rgb>1:
+    pl.close('all')
+
+    def tile_images(img, batch_size, rows, cols, rgb):
+
         batchImages = np.random.random((img_height*rows,img_width*cols,rgb))
-    else:
-        batchImages = np.random.random((img_height*rows,img_width*cols))
-        
-    for i in range(rows):
-        for j in range(cols):
-            if i*cols+j < batch_size:
-                if rgb > 1:
-                    batchImages[0+i*img_height:(i+1)*img_height,0+j*img_width:(j+1)*img_width,:] = img[i*cols+j]
-                else:
-                    batchImages[0+i*img_height:(i+1)*img_height,0+j*img_width:(j+1)*img_width]   = img[i*cols+j]
-           
-    return batchImages
+
+        if rgb>1:
+            batchImages = np.random.random((img_height*rows,img_width*cols,rgb))
+        else:
+            batchImages = np.random.random((img_height*rows,img_width*cols))
+
+        for i in range(rows):
+            for j in range(cols):
+                if i*cols+j < batch_size:
+                    if rgb > 1:
+                        batchImages[0+i*img_height:(i+1)*img_height,0+j*img_width:(j+1)*img_width,:] = img[i*cols+j]
+                    else:
+                        batchImages[0+i*img_height:(i+1)*img_height,0+j*img_width:(j+1)*img_width]   = img[i*cols+j]
+
+        return batchImages
 
 
 
@@ -67,29 +70,31 @@ max_labels = 23
 #                (0.9412,0.1373,0.9216),(0,0.6549,0.6118),(0.9765,0.5451,0),
 #                (0.8824,0.8980,0.7608)]
 
-colour_code = np.random.rand(max_labels, 3)
-colour_code[0] = [0, 0, 0]
-               
-cm = mpl.colors.ListedColormap(colour_code)
+if headless == 'False':
 
-fig, ax = pl.subplots()
+    colour_code = np.random.rand(max_labels, 3)
+    colour_code[0] = [0, 0, 0]
 
-someImage = np.random.random((img_height*np.int(rows),img_width*np.int(cols),max_labels))
-some_img_argmax = np.argmax(someImage, axis=2)
+    cm = mpl.colors.ListedColormap(colour_code)
 
-# Turn off axes and set axes limits
-im = ax.imshow(some_img_argmax, interpolation='none', cmap=cm)
-ax.axis('tight')
-ax.axis('off')
+    fig, ax = pl.subplots()
 
-# Set whitespace to 0
-fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
-fig.show()
+    someImage = np.random.random((img_height*np.int(rows),img_width*np.int(cols),max_labels))
+    some_img_argmax = np.argmax(someImage, axis=2)
+
+    # Turn off axes and set axes limits
+    im = ax.imshow(some_img_argmax, interpolation='none', cmap=cm)
+    ax.axis('tight')
+    ax.axis('off')
+
+    # Set whitespace to 0
+    fig.subplots_adjust(left=0,right=1,bottom=0,top=1)
+    fig.show()
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
 
-batch_size = 20
+batch_size = 20*15
 learning_rate = 1e-3
 iter = 0
 
@@ -130,17 +135,20 @@ with tf.Session(config=config) as sess:
 
         summary_writer.add_summary(summary, iter)
 
-        pred_class = np.argmax(pred, axis=3)
-        batch_labels[batch_labels > 0] = 1
+        if headless == 'False':
 
-        pred_class_gt_mask = np.multiply(pred_class, batch_labels)
+            fig.show()
+            pl.pause(0.00001)
 
-        batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
-        im.set_data(np.uint8(batchImage))
+            pred_class = np.argmax(pred, axis=3)
+            batch_labels[batch_labels > 0] = 1
+
+            pred_class_gt_mask = np.multiply(pred_class, batch_labels)
+
+
+            batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
+            im.set_data(np.uint8(batchImage))
 
         print('iter = ', iter, 'max = ', batchImage.max(),'min = ', batchImage.min(), 'cost = ', cost, 'imaged = ', images_per_sec)
 
         iter = iter + 1
-
-        fig.show()
-        pl.pause(0.00001)
