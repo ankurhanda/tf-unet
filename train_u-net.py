@@ -95,7 +95,7 @@ if headless == 'False':
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
 
-batch_size = 20
+batch_size = 10
 learning_rate = 1e-3
 iter = 0
 
@@ -125,9 +125,6 @@ with tf.Session(config=config) as sess:
             UNET.set_learning_rate(learning_rate=1e-3)
         else:
             UNET.set_learning_rate(learning_rate=1e-4)
-
-        # if iter >= 11000:
-        #     UNET.set_learning_rate(learning_rate=1e-4)
 
         batch_start = time.time()
         train_op, cost, pred, summary = UNET.train_batch(img, label)
