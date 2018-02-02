@@ -56,7 +56,8 @@ cols = np.int(np.ceil(args.batch_size / rows))
 #SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/ahanda/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 #SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/data/workspace/sunrgbd-meta-data/sunrgbd_rgb_training.txt")
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
-                                            "/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
+                                            # "/data/ahanda/code/baxter_data_renderer/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
+                                            "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
                                             img_type='depth')
 
 # SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
@@ -98,7 +99,7 @@ batch_size = 20*15
 learning_rate = 1e-3
 iter = 0
 
-logs_path = './tf-summary-logs/'
+logs_path = '/tensorboard/tf-summary-logs/'
 img_type = 'depth'
 
 with tf.Session(config=config) as sess:
