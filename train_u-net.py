@@ -97,7 +97,7 @@ if headless == 'False':
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 # config.gpu_options.visible_device_list = str(hvd.local_rank())
 config.gpu_options.per_process_gpu_memory_fraction = 0.5
-config.gpu_options.allow_growth = True 
+config.gpu_options.allow_growth = True
 
 
 batch_size = 10
@@ -112,7 +112,7 @@ with tf.Session(config=config) as sess:
     UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
                     img_type=img_type, use_horovod=True)
 
-    print(str(hvd.local_rank()))
+    # print(str(hvd.local_rank()))
 
     sess.run(tf.global_variables_initializer())
 
