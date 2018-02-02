@@ -96,6 +96,7 @@ if headless == 'False':
 
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 # config.gpu_options.visible_device_list = str(hvd.local_rank())
+config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
 
 batch_size = 10
