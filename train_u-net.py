@@ -95,7 +95,7 @@ if headless == 'False':
 config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 
 
-batch_size = 20*15
+batch_size = 20
 learning_rate = 1e-3
 iter = 0
 
