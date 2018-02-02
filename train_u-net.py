@@ -100,7 +100,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.8
 config.gpu_options.allow_growth = True
 
 
-batch_size = 10
+batch_size = 5
 learning_rate = 1e-3
 iter = 0
 
