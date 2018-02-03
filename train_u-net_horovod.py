@@ -36,8 +36,7 @@ SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
 
 max_labels = 23
 
-config=tf.ConfigProto(log_device_placement=False)
-config.gpu_options.visible_device_list = str(hvd.local_rank())
+
 # config.gpu_options.per_process_gpu_memory_fraction = 0.9
 # config.gpu_options.allow_growth = True
 
@@ -52,8 +51,12 @@ img_type = 'depth'
 
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
+global_step = tf.contrib.framework.get_or_create_global_step()
+
 UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_classes=max_labels, is_training=True,
-            img_type=img_type, use_horovod=True)
+            img_type=img_type, use_horovod=True, global_step=global_step)
+
+
 
 hooks = [
         # Horovod: BroadcastGlobalVariablesHook broadcasts initial variable states
@@ -61,18 +64,22 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
+        tf.train.StopAtStepHook(last_step=20000 // hvd.size()),
     ]
 
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+config.gpu_options.visible_device_list = str(hvd.local_rank())
 
-with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir,
-                                       hooks=hooks,
-                                       config=config) as mon_sess:
+with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
+
+    mon_sess.run(tf.global_variables_initializer())
 
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
     UNET.add_session(mon_sess)
 
-    while True: #not mon_sess.should_stop():
+    while not mon_sess.should_stop():
         # Run a training step synchronously.
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         batch_labels = label

@@ -12,7 +12,7 @@ import horovod.tensorflow as hvd
 class unet(object):
 
     def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14,
-                 is_training=True, img_type='rgb', use_horovod=False):
+                 is_training=True, img_type='rgb', use_horovod=False, global_step=None):
 
         self.sess = sess
 
@@ -58,7 +58,7 @@ class unet(object):
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         
         with tf.control_dependencies(update_ops):
-           self.train_op = optimizer.minimize(self.cost)
+           self.train_op = optimizer.minimize(self.cost, global_step=global_step)
 
         tf.summary.scalar("loss", self.cost)
         self.merged_summary_op = tf.summary.merge_all()
