@@ -77,12 +77,12 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         label = np.reshape(label, [-1])
 
         if iter <= 10:
-            UNET.set_learning_rate(learning_rate=1e-2)
+            UNET.set_learning_rate(learning_rate=1e-2 * hvd.size())
 
         elif (iter > 10 and iter <= 500):
-            UNET.set_learning_rate(learning_rate=1e-3)
+            UNET.set_learning_rate(learning_rate=1e-3 * hvd.size())
         else:
-            UNET.set_learning_rate(learning_rate=1e-4)
+            UNET.set_learning_rate(learning_rate=1e-4 * hvd.size())
 
         batch_start = time.time()
         train_op, cost, pred, summary = UNET.train_batch(img, label)
