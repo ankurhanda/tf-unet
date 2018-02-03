@@ -56,7 +56,7 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=20000 // hvd.size())
+        tf.train.StopAtStepHook(last_step=60000 // hvd.size())
     ]
 
 config = tf.ConfigProto()
