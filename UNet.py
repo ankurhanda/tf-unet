@@ -261,6 +261,10 @@ class unet(object):
 
         return prediction, classes, cost
 
+    def add_session(self, sess):
+        if self.sess is None:
+            self.sess = sess
+
     @staticmethod
     def get_available_gpus():
         local_device_protos = device_lib.list_local_devices()

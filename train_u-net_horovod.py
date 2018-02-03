@@ -49,32 +49,27 @@ logs_path = '/tensorboard/tf-summary-logs/'
 img_type = 'depth'
 
 
+checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
+
+UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_classes=max_labels, is_training=True,
+            img_type=img_type, use_horovod=True)
+
 hooks = [
         # Horovod: BroadcastGlobalVariablesHook broadcasts initial variable states
         # from rank 0 to all other processes. This is necessary to ensure consistent
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-
-        # Horovod: adjust number of steps based on number of GPUs.
-        # tf.train.StopAtStepHook(last_step=20000 // hvd.size()),
-
-        # tf.train.LoggingTensorHook(tensors={'step': global_step, 'loss': loss},
-        #                            every_n_iter=10),
     ]
 
-
-
-checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
 with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir,
                                        hooks=hooks,
                                        config=config) as mon_sess:
 
-    UNET = unet(batch_size, img_height, img_width, learning_rate, sess=mon_sess, num_classes=max_labels, is_training=True,
-                img_type=img_type, use_horovod=True)
-
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+
+    UNET.add_session(mon_sess)
 
     while not mon_sess.should_stop():
         # Run a training step synchronously.
