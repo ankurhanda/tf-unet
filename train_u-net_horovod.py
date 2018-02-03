@@ -75,6 +75,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
+    UNET.add_session(mon_sess)
 
     while not mon_sess.should_stop():
         # Run a training step synchronously.

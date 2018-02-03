@@ -28,5 +28,5 @@ def conv_bn_layer(input_tensor, kernel_size,output_channels,
     if bn and not relu:
         conv_layer = layers.batch_norm(inputs=conv_layer, center=True, scale=True, is_training=is_training)
 
-    print('Conv layer {0} -> {1}'.format(input_tensor.get_shape().as_list(),conv_layer.get_shape().as_list()))
+    # print('Conv layer {0} -> {1}'.format(input_tensor.get_shape().as_list(),conv_layer.get_shape().as_list()))
     return conv_layer
