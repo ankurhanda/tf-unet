@@ -41,7 +41,7 @@ max_labels = 23
 # config.gpu_options.allow_growth = True
 
 
-batch_size = 5
+batch_size = 20
 learning_rate = 1e-3
 iter = 0
 
@@ -91,7 +91,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         summary_writer.add_summary(summary, iter)
 
-        print('iter = ', iter, 'cost = ', cost, 'imaged = ', images_per_sec)
+        print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec)
 
         # mon_sess.run(train_op, feed_dict={image: image_, label: label_})
 
