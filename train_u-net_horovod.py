@@ -26,6 +26,7 @@ args = parser.parse_args()
 rows = np.int(np.ceil(np.sqrt(args.batch_size)))
 cols = np.int(np.ceil(args.batch_size / rows))
 
+hvd.init()
 
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
                                             "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
