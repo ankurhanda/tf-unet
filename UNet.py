@@ -60,7 +60,9 @@ class unet(object):
         with tf.control_dependencies(update_ops):
            self.train_op = optimizer.minimize(self.cost, global_step=global_step)
 
-        tf.summary.scalar("loss", self.cost)
+        loss_name = 'loss-' + str(hvd.rank())
+
+        tf.summary.scalar(loss_name, self.cost)
         self.merged_summary_op = tf.summary.merge_all()
 
     def build_network_clean(self, initializer, input_batch, label_batch, is_training, num_classes=14):
