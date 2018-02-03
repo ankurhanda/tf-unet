@@ -91,7 +91,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         summary_writer.add_summary(summary, iter)
 
-        print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec)
+        print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
         # mon_sess.run(train_op, feed_dict={image: image_, label: label_})
 
