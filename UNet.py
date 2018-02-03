@@ -60,7 +60,10 @@ class unet(object):
         with tf.control_dependencies(update_ops):
            self.train_op = optimizer.minimize(self.cost, global_step=global_step)
 
-        loss_name = 'loss-' + str(hvd.rank())
+        if use_horovod == True:
+            loss_name = 'loss-' + str(hvd.rank())
+        else:
+            loss_name = 'loss'
 
         tf.summary.scalar(loss_name, self.cost)
         self.merged_summary_op = tf.summary.merge_all()

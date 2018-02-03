@@ -96,26 +96,19 @@ if headless == 'False':
 
 # config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 config=tf.ConfigProto(log_device_placement=False)
-config.gpu_options.visible_device_list = str(hvd.local_rank())
-# config.gpu_options.per_process_gpu_memory_fraction = 0.9
-# config.gpu_options.allow_growth = True
+config.gpu_options.allow_growth = True
 
-
-batch_size = 5
+batch_size = 20
 learning_rate = 1e-3
 iter = 0
 
 logs_path = '/tensorboard/tf-summary-logs/'
 img_type = 'depth'
 
-
-
 with tf.Session(config=config) as sess:
 
     UNET = unet(batch_size, img_height, img_width, learning_rate, sess, num_classes=max_labels, is_training=True,
-                    img_type=img_type, use_horovod=True)
-
-    # print(str(hvd.local_rank()))
+                    img_type=img_type)
 
     sess.run(tf.global_variables_initializer())
 
