@@ -28,6 +28,7 @@ cols = np.int(np.ceil(args.batch_size / rows))
 
 hvd.init()
 
+
 SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
                                             "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
                                             img_type='depth')
@@ -71,7 +72,7 @@ with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir,
 
     UNET.add_session(mon_sess)
 
-    while not mon_sess.should_stop():
+    while True: #not mon_sess.should_stop():
         # Run a training step synchronously.
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         batch_labels = label
