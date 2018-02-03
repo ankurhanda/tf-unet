@@ -146,10 +146,13 @@ with tf.Session(config=config) as sess:
 
             pred_class_gt_mask = np.multiply(pred_class, batch_labels)
 
-
             batchImage = tile_images(pred_class_gt_mask, batch_size, rows, cols, 1)
             im.set_data(np.uint8(batchImage))
 
-        print('iter = ', iter, 'max = ', batchImage.max(),'min = ', batchImage.min(), 'cost = ', cost, 'imaged = ', images_per_sec)
+            print('iter = ', iter, 'max = ', batchImage.max(), 'min = ', batchImage.min(), 'cost = ', cost, 'images/sec = ', images_per_sec)
+
+        else:
+
+            print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec)
 
         iter = iter + 1
