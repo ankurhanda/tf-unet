@@ -64,7 +64,7 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=20000 // hvd.size()),
+        tf.train.StopAtStepHook(last_step=20000 // hvd.size())
     ]
 
 config = tf.ConfigProto()
@@ -73,11 +73,8 @@ config.gpu_options.visible_device_list = str(hvd.local_rank())
 
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
-    mon_sess.run(tf.global_variables_initializer())
-
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
-    UNET.add_session(mon_sess)
 
     while not mon_sess.should_stop():
         # Run a training step synchronously.
