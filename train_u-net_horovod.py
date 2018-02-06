@@ -56,7 +56,7 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=60000 // hvd.size())
+        tf.train.StopAtStepHook(last_step=600000 // hvd.size())
     ]
 
 config = tf.ConfigProto()
@@ -70,6 +70,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
     UNET.add_session(mon_sess)
 
     while not mon_sess.should_stop():
+
         # Run a training step synchronously.
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         batch_labels = label
@@ -94,3 +95,28 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
         iter = iter + 1
+
+
+class Solution:
+    # @param A : string
+    # @param B : tuple of strings
+    # @return a list of integers
+    def findSubstring(self, A, B):
+        hashSum = sum([hash(b) for b in B])
+        wordSize = len(B[0])
+        hashes = [hash(A[i - wordSize:i]) for i in xrange(wordSize, len(A) + 1)]
+
+        indices = []
+        substrSize = len(B) * wordSize
+        for i in xrange(wordSize):
+            rollingHash = 0
+            for j in xrange(i, len(hashes), wordSize):
+                rollingHash += hashes[j]
+                if j - i + wordSize >= substrSize:
+                    if j >= substrSize:
+                        rollingHash -= hashes[j - substrSize]
+                    if rollingHash == hashSum:
+                        indices.append(j + wordSize - substrSize)
+        indices.sort()
+        return indices
+    
