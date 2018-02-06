@@ -96,27 +96,3 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         iter = iter + 1
 
-
-class Solution:
-    # @param A : string
-    # @param B : tuple of strings
-    # @return a list of integers
-    def findSubstring(self, A, B):
-        hashSum = sum([hash(b) for b in B])
-        wordSize = len(B[0])
-        hashes = [hash(A[i - wordSize:i]) for i in xrange(wordSize, len(A) + 1)]
-
-        indices = []
-        substrSize = len(B) * wordSize
-        for i in xrange(wordSize):
-            rollingHash = 0
-            for j in xrange(i, len(hashes), wordSize):
-                rollingHash += hashes[j]
-                if j - i + wordSize >= substrSize:
-                    if j >= substrSize:
-                        rollingHash -= hashes[j - substrSize]
-                    if rollingHash == hashSum:
-                        indices.append(j + wordSize - substrSize)
-        indices.sort()
-        return indices
-    
