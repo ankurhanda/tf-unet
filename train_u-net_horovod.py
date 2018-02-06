@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import tensorflow as tf
-import custom_layers_unet
 import read_sunrgbd_data
 from PIL import Image
 import argparse
