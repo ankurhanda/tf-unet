@@ -93,5 +93,10 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         print('iter = ', iter, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
+        fileName = '/tensorboard/tf-summary-logs/time_{:03d}_{:03d}.txt'.format(hvd.rank(), iter)
+
+        with open(fileName,'w') as f:
+            f.write(images_per_sec)
+
         iter = iter + 1
 
