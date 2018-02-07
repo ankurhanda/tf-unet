@@ -34,7 +34,7 @@ SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
 
 max_labels = 23
 
-batch_size = 20
+batch_size = 30
 learning_rate = 1e-3
 iter = 0
 
