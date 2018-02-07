@@ -99,4 +99,3 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
             f.write(str(images_per_sec))
 
         iter = iter + 1
-
