@@ -91,7 +91,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         summary_writer.add_summary(summary, iter)
 
-        print('iter = ', iter, 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
+        print('iter = ', iter, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
         iter = iter + 1
 
