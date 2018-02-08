@@ -36,7 +36,7 @@ max_labels = 23
 
 batch_size = 30
 learning_rate = 1e-3
-iter = 0
+iter_num = 0
 
 logs_path = '/tensorboard/tf-summary-logs/'
 img_type = 'depth'
@@ -93,9 +93,9 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         print('iter = ', iter, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
-        fileName = '/tensorboard/tf-summary-logs/time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter)
+        fileName = logs_dir + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
 
         with open(fileName,'w') as f:
             f.write(str(images_per_sec))
 
-        iter = iter + 1
+        iter_num = iter_num + 1
