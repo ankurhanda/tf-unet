@@ -3,13 +3,17 @@ import matplotlib.pyplot as plt
 img_per_sec = []
 ngpus = 16
 
-import vapeplot
+from vapeplot import vapeplot
 
+#python graph gallery https://python-graph-gallery.com/
 #colours = ['red', 'orange', 'gold', 'deepskyblue', 'magenta', 'lightsalmon', 'blue']
 
 p = 0
 
 vapeplot.set_palette('vaporwave')
+#vapeplot.set_palette('mallsoft')
+#vapeplot.set_palette('jazzcup')
+#vapeplot.set_palette('crystal_pepsi')
 
 for ngpus in [8, 16, 32, 64, 96, 128]:
     img_per_sec = []
