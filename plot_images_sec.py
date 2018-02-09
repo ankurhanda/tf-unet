@@ -3,9 +3,13 @@ import matplotlib.pyplot as plt
 img_per_sec = []
 ngpus = 16
 
-colours = ['red', 'orange', 'gold', 'deepskyblue', 'magenta', 'lightsalmon', 'blue']
+import vapeplot
+
+#colours = ['red', 'orange', 'gold', 'deepskyblue', 'magenta', 'lightsalmon', 'blue']
 
 p = 0
+
+vapeplot.set_palette('vaporwave')
 
 for ngpus in [8, 16, 32, 64, 96, 128]:
     img_per_sec = []
@@ -26,7 +30,7 @@ for ngpus in [8, 16, 32, 64, 96, 128]:
 
         img_per_sec.append(cur_num)
 
-    plt.semilogy(img_per_sec, c=colours[p], label=str(ngpus))
+    plt.semilogy(img_per_sec)#c=colours[p], label=str(ngpus))
         
     p = p + 1
 
