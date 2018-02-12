@@ -55,7 +55,7 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=600000 // hvd.size())
+        tf.train.StopAtStepHook(last_step=100) #600000 // hvd.size())
     ]
 
 config = tf.ConfigProto()
@@ -69,7 +69,7 @@ write_images_per_sec_files = False
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
     for i in range(0, hvd.size()):
-        summary_writer = tf.summary.FileWriter(logs_path + 'hvd_rank_{:03d}'.format(i),
+        summary_writer = tf.summary.FileWriter(logs_path,
                                                graph=tf.get_default_graph())
         summary_writers.append(summary_writer)
 
