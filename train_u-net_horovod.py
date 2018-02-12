@@ -69,7 +69,7 @@ write_images_per_sec_files = False
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
     for i in range(0, hvd.size()):
-        summary_writer = tf.summary.FileWriter(logs_path,
+        summary_writer = tf.summary.FileWriter(logs_path + 'plot_{:03d}'.format(hvd.rank()),
                                                graph=tf.get_default_graph())
         summary_writers.append(summary_writer)
 
