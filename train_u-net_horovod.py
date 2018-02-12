@@ -62,9 +62,16 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 config.gpu_options.visible_device_list = str(hvd.local_rank())
 
+summary_writers = []
+
+write_images_per_sec_files = False
+
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
-    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+    for i in range(0, hvd.size()):
+        summary_writer = tf.summary.FileWriter(logs_path + 'hvd_rank_{:03d}'.format(i),
+                                               graph=tf.get_default_graph())
+        summary_writers.append(summary_writer)
 
     UNET.add_session(mon_sess)
 
@@ -76,10 +83,10 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         label = np.reshape(label, [-1])
 
-        if iter <= 10:
+        if iter_num <= 10:
             UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
 
-        elif (iter > 10 and iter <= 500):
+        elif (iter_num > 10 and iter_num <= 500):
             UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
         else:
             UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
@@ -89,13 +96,14 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         time_taken = time.time() - batch_start
         images_per_sec = batch_size / time_taken
 
-        summary_writer.add_summary(summary, iter)
+        summary_writers[hvd.rank()].add_summary(summary, iter_num)
 
         print('iter = ', iter, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
-        fileName = logs_dir + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
+        if write_images_per_sec_files:
+            fileName = logs_path + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
 
-        with open(fileName,'w') as f:
-            f.write(str(images_per_sec))
+            with open(fileName,'w') as f:
+                f.write(str(images_per_sec))
 
         iter_num = iter_num + 1
