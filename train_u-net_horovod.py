@@ -97,6 +97,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         images_per_sec = batch_size / time_taken
 
         summary_writers[hvd.rank()].add_summary(summary, iter_num)
+        summary_writers[hvd.rank()].flush()
 
         print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size)
 
