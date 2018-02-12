@@ -61,7 +61,8 @@ class unet(object):
            self.train_op = optimizer.minimize(self.cost, global_step=global_step)
 
         if use_horovod == True:
-            loss_name = 'loss-' + str(hvd.rank())
+            # loss_name = 'loss-' + str(hvd.rank())
+            loss_name = 'loss'
         else:
             loss_name = 'loss'
 
