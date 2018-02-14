@@ -91,6 +91,9 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         else:
             UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
 
+
+        #TODO: Implement Focal Loss https://arxiv.org/pdf/1708.02002.pdf
+        #https://github.com/Kongsea/tensorflow/blob/fcf0063ec7d468237b8bca4814ef06e6350c8b1e/tensorflow/contrib/losses/python/losses/loss_ops.py
         batch_start = time.time()
         train_op, cost, pred, summary = UNET.train_batch(img, label)
         time_taken = time.time() - batch_start
