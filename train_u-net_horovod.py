@@ -83,6 +83,9 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         label = np.reshape(label, [-1])
 
+        #TODO: add cosine learning rate scheduler
+        #http://pytorch.org/docs/0.3.1/optim.html#torch.optim.lr_scheduler.CosineAnnealingLR
+
         if iter_num <= 10:
             UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
 
