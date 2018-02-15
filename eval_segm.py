@@ -4,6 +4,8 @@
 Martin Kersner, m.kersner@gmail.com
 2015/11/30
 
+https://github.com/martinkersner/py_img_seg_eval
+
 Evaluation metrics for image segmentation inspired by
 paper Fully Convolutional Networks for Semantic Segmentation.
 '''
