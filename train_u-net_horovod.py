@@ -78,6 +78,8 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
     while not mon_sess.should_stop():
 
         # Run a training step synchronously.
+        # Numba JIT speed up https://rushter.com/blog/numba-cython-python-optimization/
+        # http://numba.pydata.org/numba-doc/dev/index.html
         img, label = SUNRGBD_dataset.get_random_shuffle(batch_size)
         batch_labels = label
 
