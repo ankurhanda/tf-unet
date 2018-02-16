@@ -45,9 +45,6 @@ learning_rate = 1e-3
 iter_num = 0
 
 logs_path = '/tensorboard/tf-summary-logs/'
-
-
-
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
 global_step = tf.train.get_or_create_global_step()
@@ -69,7 +66,6 @@ config.gpu_options.allow_growth = True
 config.gpu_options.visible_device_list = str(hvd.local_rank())
 
 summary_writers = []
-
 write_images_per_sec_files = False
 
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
@@ -95,10 +91,10 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         #http://pytorch.org/docs/0.3.1/optim.html#torch.optim.lr_scheduler.CosineAnnealingLR
 
         if iter_num <= 1000:
-            UNET.set_learning_rate(learning_rate=1e-1)# * hvd.size())
-
-        elif (iter_num > 1000 and iter_num <= 5000):
             UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
+
+        elif (iter_num > 1000 and iter_num <= 3000):
+            UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
         else:
             UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
 
