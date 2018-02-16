@@ -100,11 +100,11 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         #     UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
         # else:
         #     UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
-            
-        if iter_num % 53 == 0 and iter_num >= 0:
+
+        if iter_num % (SUNRGBD_dataset.dataset_size * hvd.size()) == 0 and iter_num >= 0:
             num_epochs = num_epochs + 1
             decay = np.floor((num_epochs-1)/30)
-            cur_learning_rate = base_lr * np.pow(0.95, decay)
+            cur_learning_rate = base_lr * np.power(0.95, decay)
 
         UNET.set_learning_rate(learning_rate=cur_learning_rate)
 
