@@ -90,10 +90,10 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         #TODO: add cosine learning rate scheduler
         #http://pytorch.org/docs/0.3.1/optim.html#torch.optim.lr_scheduler.CosineAnnealingLR
 
-        if iter_num <= 1000:
-            UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
+        if iter_num <= 100:
+            UNET.set_learning_rate(learning_rate=1e-2 * hvd.size())
 
-        elif (iter_num > 1000 and iter_num <= 3000):
+        elif (iter_num > 100 and iter_num <= 3000):
             UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
         else:
             UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
