@@ -50,7 +50,8 @@ class unet(object):
 
         if use_horovod == True:
             # Horovod: initialize Horovod.
-            optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder * hvd.size())
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate_placeholder)
+            # optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder * hvd.size())
             optimizer = hvd.DistributedOptimizer(optimizer)
         else:
             optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder)
