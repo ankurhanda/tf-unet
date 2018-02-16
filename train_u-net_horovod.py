@@ -28,11 +28,15 @@ cols = np.int(np.ceil(args.batch_size / rows))
 hvd.init()
 
 
-SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
-                                            "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
-                                            img_type='depth')
+# SUNRGBD_dataset = read_sunrgbd_data.dataset("SUNRGBD",
+#                                             "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
+#                                             img_type='depth')
 
-max_labels = 23
+SUNRGBD_dataset = read_scenenetrgbd_data.dataset("SceneNetRGBD",
+                                            "/se3netsproject/train_img_label_gt3_scenenet_dataset.txt",
+                                            img_type='rgb')
+
+max_labels = 14
 
 batch_size = 30
 learning_rate = 1e-3
