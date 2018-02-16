@@ -70,6 +70,8 @@ write_images_per_sec_files = False
 
 num_epochs = 1
 base_lr = 0.01
+cur_learning_rate = base_lr
+iters_per_epoch = SUNRGBD_dataset.dataset_size / ( batch_size * hvd.size)
 
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
@@ -101,7 +103,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         # else:
         #     UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
 
-        if iter_num % (SUNRGBD_dataset.dataset_size * hvd.size()) == 0 and iter_num >= 0:
+        if iter_num % iters_per_epoch == 0 and iter_num > 0:
             num_epochs = num_epochs + 1
             decay = np.floor((num_epochs-1)/30)
             cur_learning_rate = base_lr * np.power(0.95, decay)
