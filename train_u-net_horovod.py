@@ -32,9 +32,11 @@ hvd.init()
 #                                             "/se3netsproject/data/multijtdata/baxter_babbling_rarm_3.5hrs_Dec14_16/postprocessmotions/motion0",
 #                                             img_type='depth')
 
-SUNRGBD_dataset = read_scenenetrgbd_data.dataset("SceneNetRGBD",
+img_type = 'rgb'
+
+SUNRGBD_dataset = read_sunrgbd_data.dataset("SceneNetRGBD",
                                             "/se3netsproject/train_img_label_gt3_scenenet_dataset.txt",
-                                            img_type='rgb')
+                                            img_type=img_type)
 
 max_labels = 14
 
@@ -43,7 +45,7 @@ learning_rate = 1e-3
 iter_num = 0
 
 logs_path = '/tensorboard/tf-summary-logs/'
-img_type = 'depth'
+
 
 
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
