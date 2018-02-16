@@ -68,6 +68,9 @@ config.gpu_options.visible_device_list = str(hvd.local_rank())
 summary_writers = []
 write_images_per_sec_files = False
 
+num_epochs = 1
+base_lr = 0.01
+
 with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
     for i in range(0, hvd.size()):
@@ -90,13 +93,20 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         #TODO: add cosine learning rate scheduler
         #http://pytorch.org/docs/0.3.1/optim.html#torch.optim.lr_scheduler.CosineAnnealingLR
 
-        if iter_num <= 100:
-            UNET.set_learning_rate(learning_rate=1e-2 * hvd.size())
+        # if iter_num <= 100:
+        #     UNET.set_learning_rate(learning_rate=1e-2 * hvd.size())
 
-        elif (iter_num > 100 and iter_num <= 3000):
-            UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
-        else:
-            UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
+        # elif (iter_num > 100 and iter_num <= 3000):
+        #     UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
+        # else:
+        #     UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
+            
+        if iter_num % 53 == 0 and iter_num >= 0:
+            num_epochs = num_epochs + 1
+            decay = np.floor((num_epochs-1)/30)
+            cur_learning_rate = base_lr * np.pow(0.95, decay)
+
+        UNET.set_learning_rate(learning_rate=cur_learning_rate)
 
 
         #TODO: Implement Focal Loss https://arxiv.org/pdf/1708.02002.pdf
