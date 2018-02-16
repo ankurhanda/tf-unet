@@ -26,6 +26,8 @@ class dataset:
                     self.label_names.append(line.split()[1])
                     print(line.split()[0], line.split()[1])
                     i+=1
+                    if i == 100000:
+                        break
 
             self.dataset_size = i
         else:
@@ -41,7 +43,6 @@ class dataset:
             self.dataset_size = len(depth_pngs)
 
         self.shuffle_indices = list(range(0, self.dataset_size))
-
         np.random.shuffle(self.shuffle_indices)
         self.count = 0
 
