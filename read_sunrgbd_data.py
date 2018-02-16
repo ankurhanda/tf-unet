@@ -28,8 +28,8 @@ class dataset:
                     self.label_names.append(line.split()[1])
                     # print(line.split()[0], line.split()[1])
                     i+=1
-                    if i == 100000:
-                        break
+                    # if i == 100000:
+                    #     break
 
             self.dataset_size = i
         else:
