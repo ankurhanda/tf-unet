@@ -69,7 +69,7 @@ summary_writers = []
 write_images_per_sec_files = False
 
 num_epochs = 1
-base_lr = 0.01
+base_lr = 0.1
 cur_learning_rate = base_lr
 iters_per_epoch = SUNRGBD_dataset.dataset_size / ( batch_size * hvd.size())
 
