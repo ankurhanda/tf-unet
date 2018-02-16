@@ -61,7 +61,7 @@ hooks = [
         # initialization of all workers when training is started with random weights
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=100) #600000 // hvd.size())
+        tf.train.StopAtStepHook(last_step=600000)# // hvd.size())
     ]
 
 config = tf.ConfigProto()
@@ -94,11 +94,11 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         #TODO: add cosine learning rate scheduler
         #http://pytorch.org/docs/0.3.1/optim.html#torch.optim.lr_scheduler.CosineAnnealingLR
 
-        if iter_num <= 10:
-            UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
+        if iter_num <= 1000:
+            UNET.set_learning_rate(learning_rate=1e-1)# * hvd.size())
 
-        elif (iter_num > 10 and iter_num <= 500):
-            UNET.set_learning_rate(learning_rate=1e-3)# * hvd.size())
+        elif (iter_num > 1000 and iter_num <= 5000):
+            UNET.set_learning_rate(learning_rate=1e-2)# * hvd.size())
         else:
             UNET.set_learning_rate(learning_rate=1e-4) #* hvd.size())
 

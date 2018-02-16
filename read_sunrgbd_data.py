@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image
 from random import randint
 
+from tqdm import tqdm
+
 
 
 class dataset:
@@ -21,7 +23,7 @@ class dataset:
         if dataset_file.endswith('.txt'):
             i = 0
             with open(dataset_file,"r") as f:
-                for line in f:
+                for line in tqdm(f):
                     self.rgb_names.append(line.split()[0])
                     self.label_names.append(line.split()[1])
                     # print(line.split()[0], line.split()[1])
