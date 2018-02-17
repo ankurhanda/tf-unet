@@ -122,7 +122,8 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         summary_writers[hvd.rank()].flush()
 
         print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
-              'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size())
+              'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
+              'iters_per_epoch = ', iters_per_epoch)
 
         if write_images_per_sec_files:
             fileName = logs_path + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
