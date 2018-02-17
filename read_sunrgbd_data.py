@@ -4,7 +4,7 @@ import os, sys, glob
 import numpy as np
 from PIL import Image
 from random import randint
-
+# from numba import jit
 from tqdm import tqdm
 
 
@@ -48,7 +48,7 @@ class dataset:
         np.random.shuffle(self.shuffle_indices)
         self.count = 0
 
-        
+    # @jit
     def get_random_shuffle(self, batch_size):
 
         if self.img_type == 'rgb':
@@ -80,11 +80,11 @@ class dataset:
         return imgarray,labelarray
     
 
-#SUNRGBD_dataset = dataset("SUNRGBD","/media/ankur/nnseg/sunrgbd_training.txt")
-#img, label = SUNRGBD_dataset.get_random_shuffle(4)
-#Image.fromarray(np.uint8(img[1]),'RGB').show()
-#label = np.reshape(label,[-1])
-#print(label.shape)
+# SUNRGBD_dataset = dataset("SUNRGBD","/Users/ankurhanda/workspace/code/sunrgbd-meta-data/sunrgbd_training.txt")
+# img, label = SUNRGBD_dataset.get_random_shuffle(30)
+# Image.fromarray(np.uint8(img[1]),'RGB').show()
+# label = np.reshape(label,[-1])
+# print(label.shape)
     
         
     
