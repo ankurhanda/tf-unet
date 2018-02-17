@@ -104,7 +104,7 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
         if iter_num % iters_per_epoch == 0 and iter_num > 0:
             num_epochs = num_epochs + 1
-            decay = np.floor((num_epochs-1)/30)
+            decay = np.floor((num_epochs-1)/5)
             cur_learning_rate = base_lr * np.power(0.95, decay)
 
         UNET.set_learning_rate(learning_rate=cur_learning_rate)
