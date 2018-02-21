@@ -47,8 +47,12 @@ logs_path = '/tensorboard/tf-summary-logs/'
 
 global_step = tf.train.get_or_create_global_step()
 
-UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_classes=max_labels, is_training=True,
-            img_type=img_type, use_horovod=True, global_step=global_step)
+graph = tf.Graph()
+
+with graph.as_default():
+
+    UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_classes=max_labels, is_training=True,
+                img_type=img_type, use_horovod=True, global_step=global_step)
 
 # hooks = [
 #         # Horovod: BroadcastGlobalVariablesHook broadcasts initial variable states
@@ -61,7 +65,8 @@ UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_cla
 #                                    every_n_iter=1000),
 #     ]
 
-hooks = hvd.BroadcastGlobalVariablesHook(0)
+    hooks = hvd.BroadcastGlobalVariablesHook(0)
+    init = tf.global_variables_initializer()
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -79,10 +84,10 @@ checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
 # with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=config, hooks=hooks) as mon_sess:
 
-with tf.Session(config=config) as sess:
+with tf.Session(config=config, graph=graph) as sess:
 
-    sess.run(tf.global_variables_initializer())
-    sess.run(hooks)
+    init.run()
+    hooks.run()
 
     saver = tf.train.Saver()
 
