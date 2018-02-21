@@ -57,7 +57,7 @@ hooks = [
         # or restored from a checkpoint.
         hvd.BroadcastGlobalVariablesHook(0),
         tf.train.StopAtStepHook(last_step=600000), # // hvd.size())
-        tf.train.LoggingTensorHook(tensors=None,
+        tf.train.LoggingTensorHook(tensors={'step': global_step},
                                    every_n_iter=1000),
     ]
 
