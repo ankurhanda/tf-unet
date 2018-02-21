@@ -65,7 +65,8 @@ with graph.as_default():
 #                                    every_n_iter=1000),
 #     ]
 
-    hooks = hvd.BroadcastGlobalVariablesHook(0)
+    # hooks = hvd.BroadcastGlobalVariablesHook(0)
+    bcast = hvd.broadcast_global_variables(0)
     init = tf.global_variables_initializer()
 
 config = tf.ConfigProto()
