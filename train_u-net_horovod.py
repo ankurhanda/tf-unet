@@ -75,9 +75,9 @@ iters_per_epoch = int(SUNRGBD_dataset.dataset_size / ( batch_size * hvd.size()))
 
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
-with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
+saver = tf.train.Saver()
 
-    saver = tf.train.Saver()
+with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
 
     for i in range(0, hvd.size()):
         summary_writer = tf.summary.FileWriter(logs_path + 'plot_{:03d}'.format(hvd.rank()),
