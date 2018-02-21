@@ -124,7 +124,7 @@ with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=con
         summary_writers[hvd.rank()].add_summary(summary, iter_num)
         summary_writers[hvd.rank()].flush()
 
-        if iter_num % 100 == 0 and hvd.rank() == 0:
+        if iter_num % 2 == 0 and hvd.rank() == 0:
             print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch)
