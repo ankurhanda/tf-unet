@@ -145,7 +145,7 @@ with tf.Session(config=config, graph=graph) as sess:
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch)
 
-        if iter_num % 100 == 0:
+        if iter_num % 100 == 0 and hvd.rank() == 0:
             saver.save(sess, "/tensorboard/checkpoints/model.ckpt")
 
         if write_images_per_sec_files:
