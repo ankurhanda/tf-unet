@@ -88,7 +88,7 @@ checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 with tf.Session(config=config, graph=graph) as sess:
 
     init.run()
-    hooks.run()
+    bcast.run()
 
     saver = tf.train.Saver()
 
