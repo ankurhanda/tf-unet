@@ -75,9 +75,7 @@ iters_per_epoch = int(SUNRGBD_dataset.dataset_size / ( batch_size * hvd.size()))
 
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
-saver = tf.train.Saver()
-
-with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
+with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=config, hooks=hooks) as mon_sess:
 
     for i in range(0, hvd.size()):
         summary_writer = tf.summary.FileWriter(logs_path + 'plot_{:03d}'.format(hvd.rank()),
@@ -126,14 +124,10 @@ with tf.train.MonitoredTrainingSession(config=config, hooks=hooks) as mon_sess:
         summary_writers[hvd.rank()].add_summary(summary, iter_num)
         summary_writers[hvd.rank()].flush()
 
-        if iter_num % 2 == 0 and hvd.rank() == 0:
+        if iter_num % 5 == 0 and hvd.rank() == 0:
             print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch)
-
-
-        if iter_num % 100 == 0:
-            saver.save(mon_sess, "/tensorboard/checkpoints/model.ckpt")
 
         if write_images_per_sec_files:
             fileName = logs_path + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
