@@ -50,16 +50,18 @@ global_step = tf.train.get_or_create_global_step()
 UNET = unet(batch_size, img_height, img_width, learning_rate, sess=None, num_classes=max_labels, is_training=True,
             img_type=img_type, use_horovod=True, global_step=global_step)
 
-hooks = [
-        # Horovod: BroadcastGlobalVariablesHook broadcasts initial variable states
-        # from rank 0 to all other processes. This is necessary to ensure consistent
-        # initialization of all workers when training is started with random weights
-        # or restored from a checkpoint.
-        hvd.BroadcastGlobalVariablesHook(0),
-        tf.train.StopAtStepHook(last_step=600000), # // hvd.size())
-        tf.train.LoggingTensorHook(tensors={'step': global_step},
-                                   every_n_iter=1000),
-    ]
+# hooks = [
+#         # Horovod: BroadcastGlobalVariablesHook broadcasts initial variable states
+#         # from rank 0 to all other processes. This is necessary to ensure consistent
+#         # initialization of all workers when training is started with random weights
+#         # or restored from a checkpoint.
+#         hvd.BroadcastGlobalVariablesHook(0),
+#         tf.train.StopAtStepHook(last_step=600000), # // hvd.size())
+#         tf.train.LoggingTensorHook(tensors={'step': global_step},
+#                                    every_n_iter=1000),
+#     ]
+
+hooks = hvd.BroadcastGlobalVariablesHook(0)
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -75,16 +77,24 @@ iters_per_epoch = int(SUNRGBD_dataset.dataset_size / ( batch_size * hvd.size()))
 
 checkpoint_dir = '/tensorboard/checkpoints' if hvd.rank() == 0 else None
 
-with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=config, hooks=hooks) as mon_sess:
+# with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=config, hooks=hooks) as mon_sess:
+
+with tf.Session(config=config) as sess:
+
+    sess.run(tf.global_variables_initializer())
+    sess.run(hooks)
+
+    saver = tf.train.Saver()
 
     for i in range(0, hvd.size()):
         summary_writer = tf.summary.FileWriter(logs_path + 'plot_{:03d}'.format(hvd.rank()),
                                                graph=tf.get_default_graph())
         summary_writers.append(summary_writer)
 
-    UNET.add_session(mon_sess)
+    # UNET.add_session(mon_sess)
+    UNET.add_session(sess)
 
-    while not mon_sess.should_stop():
+    while True: #not mon_sess.should_stop():
 
         # Run a training step synchronously.
         # Numba JIT speed up https://rushter.com/blog/numba-cython-python-optimization/
@@ -128,6 +138,9 @@ with tf.train.MonitoredTrainingSession(checkpoint_dir=checkpoint_dir, config=con
             print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch)
+
+        if iter_num % 100 == 0:
+            saver.save(sess, "/tensorboard/checkpoints/model.ckpt")
 
         if write_images_per_sec_files:
             fileName = logs_path + 'time_gpus_{:03d}_gpuid_{:03d}_iter_{:03d}.txt'.format(hvd.size(), hvd.rank(), iter_num)
