@@ -59,7 +59,7 @@ class unet(object):
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         
         with tf.control_dependencies(update_ops):
-           self.train_op = optimizer.minimize(self.cost, global_step=global_step)
+           self.train_op = optimizer.minimize(self.cost)#, global_step=global_step)
 
         if use_horovod == True:
             # loss_name = 'loss-' + str(hvd.rank())
