@@ -123,8 +123,8 @@ with tf.Session(config=config, graph=graph) as sess:
 
         if iter_num % iters_per_epoch == 0 and iter_num > 0:
             num_epochs = num_epochs + 1
-            decay = np.floor((num_epochs-1)/5)
-            cur_learning_rate = base_lr * np.power(0.95, decay)
+            decay = np.floor((num_epochs-1)/3)
+            cur_learning_rate = base_lr * np.power(0.90, decay)
 
         UNET.set_learning_rate(learning_rate=cur_learning_rate)
 
