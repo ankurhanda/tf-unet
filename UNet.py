@@ -9,6 +9,8 @@ from multi_gpu_utils import average_grads
 from collections import OrderedDict
 import horovod.tensorflow as hvd
 
+import L4 as L4
+
 class unet(object):
 
     def __init__(self, batch_size, img_height, img_width, learning_rate, sess, num_classes=14,
@@ -50,8 +52,8 @@ class unet(object):
 
         if use_horovod == True:
             # Horovod: initialize Horovod.
-            # optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate_placeholder)
-            optimizer = tf.train.MomentumOptimizer(learning_rate=self.learning_rate_placeholder, momentum=0.95)
+            # optimizer = tf.train.MomentumOptimizer(learning_rate=self.learning_rate_placeholder, momentum=0.95)
+            optimizer = L4.L4Mom(fraction=0.25)
             # optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder * hvd.size())
             optimizer = hvd.DistributedOptimizer(optimizer)
         else:
