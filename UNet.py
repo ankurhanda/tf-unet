@@ -10,6 +10,8 @@ from collections import OrderedDict
 import horovod.tensorflow as hvd
 
 import L4 as L4
+from AMSGrad import AMSGrad
+
 
 class unet(object):
 
@@ -53,8 +55,9 @@ class unet(object):
         if use_horovod == True:
             # Horovod: initialize Horovod.
             # optimizer = tf.train.MomentumOptimizer(learning_rate=self.learning_rate_placeholder, momentum=0.95)
-            optimizer = L4.L4Mom(fraction=0.25)
+            # optimizer = L4.L4Mom(fraction=0.25)
             # optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder * hvd.size())
+            optimizer = AMSGrad(learning_rate=self.learning_rate_placeholder, beta1=0.9, beta2=0.99, epsilon=1e-8)
             optimizer = hvd.DistributedOptimizer(optimizer)
         else:
             optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate_placeholder)
