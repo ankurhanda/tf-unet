@@ -137,6 +137,7 @@ class unet(object):
                                    activation_fn=tf.identity)
 
         #Focal Loss
+        classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         pt = tf.nn.softmax(prediction)
         pt = tf.reshape(pt, [-1, num_classes])
         one_hot_labels = tf.one_hot(label_batch, num_classes)
