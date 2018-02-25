@@ -41,7 +41,7 @@ class unet(object):
         #                                                                    is_training=is_training,
         #                                                                    num_classes=14)
 
-        self.prediction, self.pred_classes, self.cost = self.build_network_clean(initializer=he_initializer,
+        self.prediction, self.pred_classes, self.cost, self.accuracy = self.build_network_clean(initializer=he_initializer,
                                                                                  input_batch=self.input_tensor,
                                                                                  label_batch=self.gt,
                                                                                  is_training=is_training,
@@ -161,7 +161,10 @@ class unet(object):
         #cost = tf.reduce_mean(tf.reduce_mean(bootstrapping_loss))
         cost = tf.reduce_mean(loss_map)
 
-        return prediction, classes, cost
+        pixel_accuracy = tf.reduce_sum(tf.multiply(tf.one_hot(classes, num_classes), one_hot_labels))
+        pixel_accuracy = tf.div(pixel_accuracy, tf.reduce_sum(one_hot_labels))
+
+        return prediction, classes, cost, pixel_accuracy
 
     def build_network(self, initializer, is_training, num_classes=14):
 
@@ -294,55 +297,55 @@ class unet(object):
         local_device_protos = device_lib.list_local_devices()
         return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
-    def prepare_multigpu_training(self, input_batch, input_labels,
-                                  he_initializer, learning_rate=1e-3,
-                                  is_training=True, num_classes=14):
-
-        gpus = len(self.get_available_gpus())
-
-        input_batch_per_gpu  = tf.split(input_batch,  gpus)
-        input_labels_per_gpu = tf.split(input_labels, gpus)
-
-        optimiser = tf.train.AdamOptimizer(learning_rate=learning_rate)
-
-        tower_grads = []
-        costs = []
-
-        for gpu_id in range(1, gpus):
-
-            reuse = not (gpu_id == 1)
-
-            with tf.device('/gpu:%d' % gpu_id), tf.variable_scope(tf.get_variable_scope(), reuse=reuse):
-
-                curr_input_batch  =  input_batch_per_gpu[gpu_id]
-                curr_input_labels = input_labels_per_gpu[gpu_id]
-
-                cur_prediction, cur_pred_classes, cur_cost = self.build_network_clean(initializer=he_initializer,
-                                                                                      input_batch=curr_input_batch,
-                                                                                      label_batch=curr_input_labels,
-                                                                                      is_training=is_training,
-                                                                                      num_classes=num_classes)
-
-                costs.append(cur_cost)
-
-                scope = tf.get_variable_scope()
-                batch_norm_updates_op = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope))
-
-                grads = optimiser.compute_gradients(cur_cost)
-                tower_grads.append(grads)
-
-        with tf.device('/gpu:0'):
-            grads = average_grads(tower_grads)
-            apply_gradient_op = optimiser.apply_gradients(grads)
-
-        # save moving average
-        variable_averages = tf.train.ExponentialMovingAverage(0.997)#, global_step)
-        variables_averages_op = variable_averages.apply(tf.trainable_variables())
-
-        with tf.control_dependencies([variables_averages_op, apply_gradient_op, batch_norm_updates_op]):
-            train_op = tf.no_op(name='train_op')
-
-        return train_op, tf.add_n(costs) / gpus, cur_prediction
+    # def prepare_multigpu_training(self, input_batch, input_labels,
+    #                               he_initializer, learning_rate=1e-3,
+    #                               is_training=True, num_classes=14):
+    #
+    #     gpus = len(self.get_available_gpus())
+    #
+    #     input_batch_per_gpu  = tf.split(input_batch,  gpus)
+    #     input_labels_per_gpu = tf.split(input_labels, gpus)
+    #
+    #     optimiser = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    #
+    #     tower_grads = []
+    #     costs = []
+    #
+    #     for gpu_id in range(1, gpus):
+    #
+    #         reuse = not (gpu_id == 1)
+    #
+    #         with tf.device('/gpu:%d' % gpu_id), tf.variable_scope(tf.get_variable_scope(), reuse=reuse):
+    #
+    #             curr_input_batch  =  input_batch_per_gpu[gpu_id]
+    #             curr_input_labels = input_labels_per_gpu[gpu_id]
+    #
+    #             cur_prediction, cur_pred_classes, cur_cost = self.build_network_clean(initializer=he_initializer,
+    #                                                                                   input_batch=curr_input_batch,
+    #                                                                                   label_batch=curr_input_labels,
+    #                                                                                   is_training=is_training,
+    #                                                                                   num_classes=num_classes)
+    #
+    #             costs.append(cur_cost)
+    #
+    #             scope = tf.get_variable_scope()
+    #             batch_norm_updates_op = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope))
+    #
+    #             grads = optimiser.compute_gradients(cur_cost)
+    #             tower_grads.append(grads)
+    #
+    #     with tf.device('/gpu:0'):
+    #         grads = average_grads(tower_grads)
+    #         apply_gradient_op = optimiser.apply_gradients(grads)
+    #
+    #     # save moving average
+    #     variable_averages = tf.train.ExponentialMovingAverage(0.997)#, global_step)
+    #     variables_averages_op = variable_averages.apply(tf.trainable_variables())
+    #
+    #     with tf.control_dependencies([variables_averages_op, apply_gradient_op, batch_norm_updates_op]):
+    #         train_op = tf.no_op(name='train_op')
+    #
+    #     return train_op, tf.add_n(costs) / gpus, cur_prediction
 
     def get_cost(self, inputs, labels):
         return self.sess.run(self.cost, feed_dict={
@@ -358,7 +361,7 @@ class unet(object):
         # Comparing NCHW vs NHWC on GPU
         # https://github.com/tensorflow/tensorflow/issues/12419
 
-        return self.sess.run([self.train_op, self.cost, self.prediction, self.merged_summary_op], feed_dict={
+        return self.sess.run([self.train_op, self.cost, self.prediction, self.accuracy, self.merged_summary_op], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels,
             self.learning_rate_placeholder: self.learning_rate
