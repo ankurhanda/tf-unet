@@ -138,6 +138,7 @@ class unet(object):
 
         #Focal Loss
         pt = tf.nn.softmax(prediction)
+        pt = tf.reshape(pt, [-1, num_classes])
         one_hot_labels = tf.one_hot(label_batch, num_classes)
         ce_pt = -tf.multiply(tf.log(pt), one_hot_labels)
         modulation = tf.pow(tf.multiply(1.-pt, one_hot_labels), 2.0)
