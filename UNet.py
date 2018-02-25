@@ -161,10 +161,10 @@ class unet(object):
         #cost = tf.reduce_mean(tf.reduce_mean(bootstrapping_loss))
         cost = tf.reduce_mean(loss_map)
 
-        pixel_accuracy = tf.reduce_sum(tf.multiply(tf.reshape(tf.one_hot(classes, num_classes), [-1, num_classes
-                                                                                                 ]),
-                                                   one_hot_labels))
-        
+        one_hot_pred = tf.one_hot(classes, num_classes)
+        one_hot_pred = tf.reshape(one_hot_pred, [-1, num_classes])
+
+        pixel_accuracy = tf.reduce_sum(tf.multiply(one_hot_pred, one_hot_labels))
         pixel_accuracy = tf.div(pixel_accuracy, tf.reduce_sum(one_hot_labels))
 
         return prediction, classes, cost, pixel_accuracy
