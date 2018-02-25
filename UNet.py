@@ -41,7 +41,7 @@ class unet(object):
         #                                                                    is_training=is_training,
         #                                                                    num_classes=14)
 
-        self.prediction, self.pred_classes, self.cost, self.accuracy = self.build_network_clean(initializer=he_initializer,
+        self.prediction, self.pred_classes, self.cost, self.accuracy, self.class_accuracy = self.build_network_clean(initializer=he_initializer,
                                                                                  input_batch=self.input_tensor,
                                                                                  label_batch=self.gt,
                                                                                  is_training=is_training,
@@ -167,7 +167,10 @@ class unet(object):
         pixel_accuracy = tf.reduce_sum(tf.multiply(one_hot_pred, one_hot_labels))
         pixel_accuracy = tf.div(pixel_accuracy, tf.reduce_sum(one_hot_labels))
 
-        return prediction, classes, cost, pixel_accuracy
+        class_accuracy = tf.reduce_sum(tf.multiply(one_hot_pred, one_hot_labels), axis=0)
+        class_accuracy = tf.div(class_accuracy, tf.reduce_sum(one_hot_labels, axis=0))
+
+        return prediction, classes, cost, pixel_accuracy, class_accuracy
 
     def build_network(self, initializer, is_training, num_classes=14):
 
@@ -364,7 +367,8 @@ class unet(object):
         # Comparing NCHW vs NHWC on GPU
         # https://github.com/tensorflow/tensorflow/issues/12419
 
-        return self.sess.run([self.train_op, self.cost, self.prediction, self.accuracy, self.merged_summary_op], feed_dict={
+        return self.sess.run([self.train_op, self.cost, self.prediction, self.accuracy, self.class_accuracy,
+                              self.merged_summary_op], feed_dict={
             self.input_tensor: inputs,
             self.gt_labels: labels,
             self.learning_rate_placeholder: self.learning_rate

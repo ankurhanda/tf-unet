@@ -133,7 +133,7 @@ with tf.Session(config=config, graph=graph) as sess:
         #https://github.com/Kongsea/tensorflow/blob/fcf0063ec7d468237b8bca4814ef06e6350c8b1e/tensorflow/contrib/losses/python/losses/loss_ops.py
 
         batch_start = time.time()
-        train_op, cost, pred, accuracy, summary = UNET.train_batch(img, label)
+        train_op, cost, pred, accuracy, class_accuracy, summary = UNET.train_batch(img, label)
         time_taken = time.time() - batch_start
         images_per_sec = batch_size / time_taken
 
@@ -144,6 +144,7 @@ with tf.Session(config=config, graph=graph) as sess:
             print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch, 'accuracy = ', accuracy)
+            print('class_accuracy = ', class_accuracy)
 
         if iter_num % iters_per_epoch == 0 and hvd.rank() == 0:
             saver.save(sess, "/tensorboard/checkpoints/model.ckpt")
