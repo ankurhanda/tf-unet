@@ -141,7 +141,7 @@ class unet(object):
         pt = tf.nn.softmax(prediction)
         pt = tf.reshape(pt, [-1, num_classes])
         one_hot_labels = tf.one_hot(label_batch, num_classes)
-        ce_pt = -tf.multiply(tf.log(pt), one_hot_labels)
+        ce_pt = -tf.multiply(tf.log(pt+1e-8), one_hot_labels)
         modulation = tf.pow(tf.multiply(1.-pt, one_hot_labels), 2.0)
         loss_map = tf.reduce_max(tf.multiply(ce_pt, modulation),axis=1)
 
