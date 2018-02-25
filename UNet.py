@@ -136,11 +136,20 @@ class unet(object):
                                    stride=1, padding='SAME', weights_initializer=initializer,
                                    activation_fn=tf.identity)
 
+        #Focal Loss
+        pt = tf.nn.softmax(prediction)
+        one_hot_labels = tf.one_hot(label_batch, num_classes)
+        ce_pt = -tf.multiply(tf.log(pt), one_hot_labels)
+        modulation = tf.pow(tf.multiply(1.-pt, one_hot_labels), 2.0)
+        loss_map = tf.multiply(ce_pt, modulation)
+
+        '''
         classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
         flattened_pred = tf.reshape(prediction, [-1, num_classes])
-
         # Define loss and optimizer
         loss_map = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=flattened_pred, labels=label_batch)
+        '''
+
         loss_map = tf.multiply(loss_map, tf.to_float(tf.not_equal(label_batch, 0)))
 
         # https://arxiv.org/pdf/1611.08323.pdf (Eq. 10)
