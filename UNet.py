@@ -143,7 +143,7 @@ class unet(object):
         one_hot_labels = tf.one_hot(label_batch, num_classes)
         ce_pt = -tf.multiply(tf.log(pt), one_hot_labels)
         modulation = tf.pow(tf.multiply(1.-pt, one_hot_labels), 2.0)
-        loss_map = tf.multiply(ce_pt, modulation)
+        loss_map = tf.reduce_max(tf.multiply(ce_pt, modulation),axis=3)
 
         '''
         classes = tf.cast(tf.argmax(prediction, 3), tf.uint8)
