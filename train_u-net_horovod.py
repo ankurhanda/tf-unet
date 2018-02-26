@@ -100,6 +100,8 @@ with tf.Session(config=config, graph=graph) as sess:
     # UNET.add_session(mon_sess)
     UNET.add_session(sess)
 
+    num_params = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+
     while True: #not mon_sess.should_stop():
 
         # Run a training step synchronously.
@@ -128,10 +130,6 @@ with tf.Session(config=config, graph=graph) as sess:
 
         UNET.set_learning_rate(learning_rate=cur_learning_rate)
 
-
-        #TODO: Implement Focal Loss https://arxiv.org/pdf/1708.02002.pdf
-        #https://github.com/Kongsea/tensorflow/blob/fcf0063ec7d468237b8bca4814ef06e6350c8b1e/tensorflow/contrib/losses/python/losses/loss_ops.py
-
         batch_start = time.time()
         train_op, cost, pred, accuracy, class_accuracy, summary = UNET.train_batch(img, label)
         time_taken = time.time() - batch_start
@@ -144,7 +142,7 @@ with tf.Session(config=config, graph=graph) as sess:
             print('iter = ', iter_num, 'hvd_rank = ', hvd.rank(), 'cost = ', cost, 'images/sec = ', images_per_sec, 'batch_size = ', batch_size,
                   'lr = ', cur_learning_rate, 'epochs = ', num_epochs, 'dataset_size = ', SUNRGBD_dataset.dataset_size, 'hvd_size =', hvd.size(),
                   'iters_per_epoch = ', iters_per_epoch, 'accuracy = ', accuracy)
-            print('class_accuracy = ', class_accuracy)
+            print('class_accuracy = ', class_accuracy, 'num_params = ', num_params)
 
         if iter_num % iters_per_epoch == 0 and hvd.rank() == 0:
             saver.save(sess, "/tensorboard/checkpoints/model.ckpt")
